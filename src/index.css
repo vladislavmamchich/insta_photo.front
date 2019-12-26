@@ -1,13 +1,168 @@
+/*@import url('https://fonts.googleapis.com/css?family=Fredoka+One&display=swap');*/
+
+/*:root {
+	--coral: #fc7168;
+	--white: #feffff;
+	--black: #454545;
+	--grey: #d8d8d8;
+	--blue: #007fff;
+	--golden: #f8b94d;
+}*/
+
+/*html,
+body,
+#root {
+	height: 100%;
+}*/
+
 body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+	margin: 0;
+	font-family: Lucida Grande, Helvetica, sans-serif;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	background: var(--coral);
+	color: var(--white);
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.title-font {
+	font-family: 'Fredoka One', sans-serif;
+}
+.h-100vh {
+	height: 100vh;
+}
+#modal-root {
+	position: relative;
+	z-index: 999;
+}
+.modal-window {
+	display: flex;
+}
+.my-modal-window {
+	background-color: rgba(0, 0, 0, 0.5);
+	position: fixed;
+	height: 100%;
+	width: 100%;
+	top: 0;
+	left: 0;
+	overflow: scroll;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.modal-window > .modal {
+	display: block;
+}
+.loader {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+}
+.ladda-button {
+	-webkit-font-smoothing: unset;
+	background: transparent;
+	border: 1px solid var(--white);
+	width: 200px;
+	height: 30px;
+	color: var(--white);
+	/*font-size: 12px;*/
+	/*outline: none;*/
+	text-transform: uppercase;
+	transition: none !important;
+	-moz-transition: none !important;
+	-webkit-transition: none !important;
+	-o-transition: color 0 ease-in;
+	padding: 4px 10px !important;
+}
+.ladda-button[disabled],
+.ladda-button[data-loading] {
+	/*background-color: #4a83fa !important;*/
+	background-color: var(--white) !important;
+	color: var(--coral) !important;
+}
+.ladda-button:hover {
+	color: var(--coral) !important;
+	background-color: var(--white) !important;
+}
+.custom-input input {
+	text-align: center;
+}
+
+/*.wrapper {
+	display: flex;
+	flex-direction: column;
+	min-height: 100%;
+}*/
+/*header {
+	position: relative;
+}*/
+/*header div:last-child {
+	position: absolute;
+	right: 0;
+	top: 0;
+}*/
+/*.content {
+	flex: 1 0 auto;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+}*/
+/*.logo {
+	position: absolute;
+	top: 0;
+	left: 0;
+	background: var(--white);
+	color: var(--coral);
+	font-family: 'Fredoka One', cursive;
+	text-align: center;
+	width: 200px;
+	height: 100px;
+}*/
+/*.footer {
+	flex: 0 0 auto;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+}*/
+/*.copyright {
+	position: absolute;
+	left: 0;
+}*/
+.welcome-block {
+	border: 4px solid var(--white);
+	padding: 10px 30px 20px;
+	display: flex;
+	align-items: center;
+	flex-direction: column;
+	justify-content: space-between;
+	height: 320px;
+}
+.welcome-block .title {
+	background: var(--white);
+	color: var(--coral);
+	text-transform: uppercase;
+	font-family: 'Fredoka One', cursive;
+	text-align: center;
+	width: 120px;
+}
+/* react select */
+/*.react-select-container {
+	min-width: 90px;
+}*/
+.left-asterisk:before {
+	content: '*';
+	position: absolute;
+	width: 0;
+	height: 0;
+	display: block;
+	left: -16px;
+	top: 3px;
 }
