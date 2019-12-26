@@ -751,7 +751,7 @@ hr {
   transition: 0.1s;
 }
 
-.modal-open .container-fluid,
+/*.modal-open .container-fluid,
 .modal-open .container-sm,
 .modal-open .container-md,
 .modal-open .container-lg,
@@ -759,7 +759,7 @@ hr {
   -webkit-filter: blur(2px);
   filter: blur(2px);
 }
-
+*/
 .modal-dark {
   background-color: rgba(122, 81, 78, 0.8);
 }

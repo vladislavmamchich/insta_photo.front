@@ -28,7 +28,7 @@ class Modal extends PureComponent {
     }
 
     onOutClick = e => {
-        const modal = document.querySelector('.modal-window')
+        const modal = document.querySelector('.modal-content')
         if (!modal.contains(e.target)) {
             // console.log(e.target)
             // console.log('not contain')

@@ -18,4 +18,8 @@ export const a_setProfile = payload => ({
 	type: 'SET_PROFILE',
 	payload
 })
+export const a_setModal = (payload = null) => ({
+	type: 'SET_MODAL',
+	payload
+})
 

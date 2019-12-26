@@ -9,6 +9,10 @@ import { connect } from 'react-redux'
 import Select from '../components/common/Select'
 
 class Main extends PureComponent {
+	componentDidMount() {
+		const el = document.querySelector('.logo')
+		el.scrollIntoView({ block: 'start', behavior: 'smooth' })
+	}
 	render() {
 		const { history } = this.props
 		return (

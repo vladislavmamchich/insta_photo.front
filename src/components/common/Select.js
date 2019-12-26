@@ -93,10 +93,13 @@ class Select extends Component {
         placeholder: 'Select'
     }
     handleChange = selectedOption => {
+        const { onChange } = this.props
         this.setState({ selectedOption }, () =>
             console.log(`Option selected:`, this.state.selectedOption)
         )
-        this.props.onChange(selectedOption.value)
+        if (onChange instanceof Function) {
+            onChange(selectedOption.value)
+        }
     }
     componentDidMount() {
         const { type, options } = this.props
