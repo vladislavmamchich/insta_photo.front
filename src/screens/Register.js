@@ -1,17 +1,23 @@
 import React, { PureComponent } from 'react'
 import { connect } from 'react-redux'
 import { Link } from 'react-router-dom'
-
-// import { toast } from 'react-toastify'
+import { toast } from 'react-toastify'
+import { CountryDropdown, RegionDropdown } from 'react-country-region-selector'
 // import i18next from 'i18next'
 
-// import { t_login } from '../../redux/tracks'
+import { a_updateRegisterPhoto, a_updateRotation } from '../redux/actions'
+import { debounce } from '../utils/helpers'
+import { t_checkUniq, t_register } from '../redux/tracks'
+
+import Input from '../components/common/Input'
 import Button from '../components/common/Button'
 import Select from '../components/common/Select'
+import ImageUpload from '../components/common/ImageUpload'
 import AddPhoto from '../components/AddPhoto'
+import Captcha from '../components/service/Captcha'
 
-let photos = []
-
+let photo = []
+// console.log(CountryRegionData)
 class Register extends PureComponent {
 	state = {
 		with_email: false,
@@ -22,9 +28,9 @@ class Register extends PureComponent {
 		password: '',
 		show_pass: false,
 		repeat_password: '',
-		country: null,
-		region: null,
-		locality: null,
+		country: '',
+		region: '',
+		locality: '',
 		height: '',
 		weight: '',
 		chest: '',
@@ -32,12 +38,69 @@ class Register extends PureComponent {
 		thighs: '',
 		operations: false,
 		nationality: '',
-		age: ''
+		age: '',
+		uniq: true,
+		registration: false,
+		captcha: ''
 	}
 
 	componentDidMount() {
 		const el = document.querySelector('.logo')
 		el.scrollIntoView({ block: 'start', behavior: 'smooth' })
+	}
+
+	handleImageUpload = acceptedFiles => {
+		const { updateRegisterPhoto } = this.props
+		updateRegisterPhoto({ index: 0, value: acceptedFiles[0] })
+	}
+
+	checkUniq = debounce(async () => {
+		const { checkUniq } = this.props
+		const { email, nickname } = this.state
+		try {
+			await checkUniq({ email, nickname })
+			this.setState({ uniq: true })
+		} catch (err) {
+			this.setState({ uniq: false })
+		}
+	}, 1000)
+
+	register = async (field, value) => {
+		try {
+			const { register, registerPhotos, history, rotations } = this.props
+			if (!registerPhotos.length) {
+				toast.warning('Choose at least one image')
+			} else {
+				const payload = new FormData()
+				const l = registerPhotos.length
+				for (let i = 0; i < l; i++) {
+					payload.append('files', registerPhotos[i])
+				}
+				let fields = { ...this.state }
+				fields.uniq = undefined
+				fields.registration = undefined
+				payload.append('data', JSON.stringify(fields))
+				payload.append('rotations', JSON.stringify(rotations))
+				this.setState({ registration: true })
+				await register(payload)
+				history.push('/login')
+				if (this.state.with_email) {
+					toast.success(
+						'When the profile passes admin moderation, an alert will be sent to your email'
+					)
+				} else {
+					toast.success('Try to log in through time')
+				}
+			}
+		} catch (err) {
+			this.setState({ registration: false })
+		}
+	}
+
+	rotate() {
+		const { updateRotation, rotations } = this.props
+		const newRotation = rotations[0] + 90 >= 360 ? 0 : rotations[0] + 90
+		updateRotation({ index: 0, value: newRotation })
 	}
 
 	render() {
@@ -46,17 +109,24 @@ class Register extends PureComponent {
 			nickname,
 			email,
 			allow_share_email,
-			secret_word,
-			password,
 			show_pass,
-			repeat_password,
 			height,
 			weight,
 			chest,
 			waist,
 			thighs,
-			operations
+			operations,
+			uniq,
+			country,
+			region,
+			registration,
+			nationality,
+			locality
 		} = this.state
+		const { registerPhotos, rotations } = this.props
+		const addPhoto =
+			registerPhotos.length < 5 &&
+			registerPhotos.length - 1 === photo.length
 		return (
 			<div className="px-2 px-lg-5">
 				<div className="mt-5 registration">
@@ -67,7 +137,7 @@ class Register extends PureComponent {
 						<div className="row">
 							<div className="col-lg-3">
 								<div className="custom-checkbox my-3">
-									<label tabIndex={1}>
+									<label>
 										<input
 											checked={!with_email}
 											type="radio"
@@ -78,25 +148,26 @@ class Register extends PureComponent {
 											}
 										/>
 										<span className="checkbox-icon" />
-										<div className="custom-input">
-											<input
-												tabIndex={2}
-												required
-												type="text"
-												name="nickname"
-												placeholder="nickname"
-												value={nickname}
-												onChange={e =>
-													this.setState({
-														nickname: e.target.value
-													})
-												}
-											/>
-										</div>
+										<Input
+											classNames="mt-3"
+											changeHandler={value =>
+												this.setState({
+													nickname: value,
+													uniq: true
+												})
+											}
+											placeholder="nickname"
+											onBlur={() => this.checkUniq()}
+											label={
+												nickname && !with_email && !uniq
+													? 'User with this nickname already exist'
+													: null
+											}
+										/>
 									</label>
 								</div>
 								<div className="custom-checkbox my-3">
-									<label tabIndex={1}>
+									<label>
 										<input
 											checked={with_email}
 											type="radio"
@@ -107,26 +178,28 @@ class Register extends PureComponent {
 											}
 										/>
 										<span className="checkbox-icon" />
-										<div className="custom-input mt-3">
-											<input
-												tabIndex={3}
-												required
-												type="email"
-												name="email"
-												placeholder="email"
-												value={email}
-												onChange={e =>
-													this.setState({
-														email: e.target.value
-													})
-												}
-											/>
-										</div>
+										<Input
+											classNames="mt-3"
+											changeHandler={value =>
+												this.setState({
+													email: value,
+													uniq: true
+												})
+											}
+											type="email"
+											placeholder="email"
+											onBlur={() => this.checkUniq()}
+											label={
+												email && with_email && !uniq
+													? 'User with this email already exist'
+													: null
+											}
+										/>
 									</label>
 								</div>
 
 								<div className="custom-checkbox ml-4 mt-4">
-									<label tabIndex={4}>
+									<label>
 										<input
 											onChange={() =>
 												this.setState(ps => ({
@@ -143,43 +216,32 @@ class Register extends PureComponent {
 									</label>
 								</div>
 								{with_email && (
-									<div className="custom-input mt-3">
-										<input
-											tabIndex={5}
-											required
-											type="text"
-											name="secret"
-											placeholder="secret word"
-											value={secret_word}
-											onChange={e =>
-												this.setState({
-													secret_word: e.target.value
-												})
-											}
-										/>
-									</div>
-								)}
-								<div className="custom-input mt-3">
-									<input
-										tabIndex={6}
-										required
-										type={show_pass ? 'text' : 'password'}
-										name="password"
-										placeholder="password"
-										autoComplete="new-password"
-										value={password}
-										onChange={e =>
+									<Input
+										classNames="mt-3"
+										changeHandler={value =>
 											this.setState({
-												password: e.target.value
+												secret_word: value
 											})
 										}
+										placeholder="secret word"
 									/>
-								</div>
+								)}
+								<Input
+									classNames="mt-3"
+									changeHandler={value =>
+										this.setState({
+											password: value
+										})
+									}
+									placeholder="password"
+									type={show_pass ? 'text' : 'password'}
+									autoComplete="new-password"
+								/>
 								<div
 									className="custom-checkbox ml-4 mt-4"
 									id="show_pass_check"
 								>
-									<label tabIndex={7}>
+									<label>
 										<input
 											type="checkbox"
 											value={show_pass}
@@ -195,21 +257,17 @@ class Register extends PureComponent {
 										</span>
 									</label>
 								</div>
-								<div className="custom-input mt-3">
-									<input
-										tabIndex={8}
-										required
-										type={show_pass ? 'text' : 'password'}
-										name="password_confirm"
-										placeholder="repeat password"
-										value={repeat_password}
-										onChange={e =>
-											this.setState({
-												repeat_password: e.target.value
-											})
-										}
-									/>
-								</div>
+								<Input
+									classNames="mt-3"
+									changeHandler={value =>
+										this.setState({
+											repeat_password: value
+										})
+									}
+									placeholder="repeat password"
+									type={show_pass ? 'text' : 'password'}
+									autoComplete="new-password"
+								/>
 							</div>
 							<div className="col-lg-9 mt-5 mt-lg-0 font-18">
 								<p className="mb-0">
@@ -244,36 +302,70 @@ class Register extends PureComponent {
 						<div className="row">
 							<div className="col-lg-4 col-md-6 d-flex flex-column flex-md-row">
 								<div className="mr-4">
-									<Select
-										type="country"
-										className="left-asterisk"
-										onChange={country =>
-											this.setState({ country })
-										}
-									/>
-									<Select
-										type="region"
-										className="left-asterisk"
-										onChange={region =>
-											this.setState({ region })
-										}
-									/>
-									<Select
-										type="locality"
-										className="left-asterisk"
-										onChange={locality =>
-											this.setState({ locality })
-										}
-									/>
+									<div className="position-relative">
+										<div className="left-asterisk">
+											<CountryDropdown
+												value={country}
+												onChange={country =>
+													this.setState({
+														country
+													})
+												}
+												classes="country-region-select"
+												defaultOptionLabel="country"
+											/>
+										</div>
+									</div>
+									<div className="position-relative">
+										<div className="left-asterisk">
+											<RegionDropdown
+												country={country}
+												value={region}
+												onChange={region =>
+													this.setState({
+														region
+													})
+												}
+												classes="country-region-select"
+												defaultOptionLabel="region"
+												disabled={!country}
+												blankOptionLabel="region"
+											/>
+										</div>
+									</div>
+									<div className="position-relative">
+										<div className="left-asterisk">
+											<RegionDropdown
+												country={country}
+												value={locality}
+												onChange={locality =>
+													this.setState({
+														locality
+													})
+												}
+												classes="country-region-select"
+												defaultOptionLabel="locality"
+												disabled={!region}
+												blankOptionLabel="locality"
+											/>
+										</div>
+									</div>
 								</div>
 								<div>
-									<Select
-										type="nationality"
-										className="left-asterisk"
-										onChange={nationality =>
-											this.setState({ nationality })
-										}
-									/>
+									<div className="position-relative">
+										<div className="left-asterisk">
+											<CountryDropdown
+												value={nationality}
+												onChange={nationality =>
+													this.setState({
+														nationality
+													})
+												}
+												classes="country-region-select"
+												defaultOptionLabel="nationality"
+											/>
+										</div>
+									</div>
 									<Select
 										type="age"
 										className="left-asterisk"
@@ -286,7 +378,7 @@ class Register extends PureComponent {
 									<div className="col-12 col-md-4">
 										<div className="custom-input with-asterisk my-2 mx-2">
 											<input
-												type="text"
+												type="number"
 												name="height"
 												placeholder="height"
 												value={height}
@@ -295,11 +387,14 @@ class Register extends PureComponent {
 														height: e.target.value
 													})
 												}
+												min={10}
+												max={300}
+												step={0.1}
 											/>
 										</div>
 										<div className="custom-input with-asterisk my-2 mx-2">
 											<input
-												type="text"
+												type="number"
 												name="chest"
 												placeholder="chest"
 												value={chest}
@@ -308,13 +403,16 @@ class Register extends PureComponent {
 														chest: e.target.value
 													})
 												}
+												min={10}
+												max={300}
+												step={0.1}
 											/>
 										</div>
 									</div>
 									<div className="col-12 col-md-4">
 										<div className="custom-input with-asterisk my-2 mx-2">
 											<input
-												type="text"
+												type="number"
 												name="waist"
 												placeholder="waist"
 												value={waist}
@@ -323,11 +421,14 @@ class Register extends PureComponent {
 														waist: e.target.value
 													})
 												}
+												min={10}
+												max={300}
+												step={0.1}
 											/>
 										</div>
 										<div className="custom-input with-asterisk my-2 mx-2">
 											<input
-												type="text"
+												type="number"
 												name="thighs"
 												placeholder="thighs"
 												value={thighs}
@@ -336,13 +437,16 @@ class Register extends PureComponent {
 														thighs: e.target.value
 													})
 												}
+												min={10}
+												max={300}
+												step={0.1}
 											/>
 										</div>
 									</div>
 									<div className="col-12 col-md-4">
 										<div className="custom-input with-asterisk my-2 mx-2">
 											<input
-												type="text"
+												type="number"
 												name="weight"
 												placeholder="weight"
 												value={weight}
@@ -351,6 +455,9 @@ class Register extends PureComponent {
 														weight: e.target.value
 													})
 												}
+												min={10}
+												max={300}
+												step={0.1}
 											/>
 										</div>
 									</div>
@@ -403,10 +510,7 @@ class Register extends PureComponent {
 								</p>
 							</div>
 							<div className="col-lg-2 mb-3">
-								<label className="btn btn-outline-light">
-									<span>choose...</span>
-									<input type="file" className="d-none" />
-								</label>
+								<ImageUpload onDrop={this.handleImageUpload} />
 								<div className="custom-checkbox mt-2">
 									<label tabIndex={10}>
 										<input
@@ -419,14 +523,24 @@ class Register extends PureComponent {
 									</label>
 								</div>
 							</div>
-							<div className="col-lg-3 mb-3">
-								<img
-									src="http://lorempixel.com/500/600"
-									className="img-fluid mx-auto d-block"
-									alt="models"
-								/>
+							<div className="col-lg-5 mb-3 d-flex justify-content-center">
+								<div
+									className="image-container"
+									style={{
+										transform: `rotate(${rotations[0]}deg)`
+									}}
+								>
+									{registerPhotos[0] && (
+										<img
+											src={URL.createObjectURL(
+												registerPhotos[0]
+											)}
+											alt="img"
+										/>
+									)}
+								</div>
 							</div>
-							<div className="col-lg-7 d-flex flex-column justify-content-between mb-3">
+							<div className="col-lg-5 d-flex flex-column justify-content-between mb-3">
 								<div>
 									<p>
 										Lorem ipsum dolor sit amet, consectetur
@@ -445,18 +559,23 @@ class Register extends PureComponent {
 										similique voluptate! Repellendus?
 									</p>
 								</div>
-								<button className="btn btn-outline-light mr-auto d-flex align-items-center justify-content-center">
-									<span className="fa fa-redo p-1" />
-								</button>
+								{registerPhotos[0] && (
+									<button
+										onClick={() => this.rotate()}
+										className="btn btn-outline-light mr-auto d-flex align-items-center justify-content-center"
+									>
+										<span className="fa fa-redo p-1" />
+									</button>
+								)}
 							</div>
 						</div>
-						{photos.map((i, id) => (
-							<AddPhoto key={id} />
+						{photo.map((i, id) => (
+							<AddPhoto key={id} index={id + 1} />
 						))}
-						{photos.length < 4 && (
+						{addPhoto && (
 							<div className="row">
 								<a
-									onClick={() => photos.push(1)}
+									onClick={() => photo.push(1)}
 									className="mb-5"
 									href="#!"
 								>
@@ -464,14 +583,24 @@ class Register extends PureComponent {
 								</a>
 							</div>
 						)}
-						<Button
-							className="mt-2 text-uppercase"
-							label="captcha"
-						/>
+						<div className="row">
+							<div className="col-lg-3 col-md-4 col-6">
+								<Captcha />
+								<Input
+									classNames="ml-0 mb-3"
+									changeHandler={captcha =>
+										this.setState({ captcha })
+									}
+									placeholder="captcha"
+								/>
+							</div>
+						</div>
 						<div className="d-flex align-items-center justify-content-between">
 							<Button
-								className="mt-2 text-uppercase"
+								className="text-uppercase"
 								label="submit"
+								loading={registration}
+								onClick={() => this.register()}
 							/>
 							<div>
 								<Link
@@ -491,13 +620,23 @@ class Register extends PureComponent {
 }
 
 const mapStateToProps = state => ({
-	loading: state.service.loading,
+	registerPhotos: state.service.registerPhotos,
+	rotations: state.service.rotations,
 	language: state.profile.language
 })
 const mapDispatchToProps = dispatch => ({
-	// login: ({ payload, fail }) => {
-	// 	dispatch(t_login({ payload, fail }))
-	// }
+	updateRegisterPhoto: payload => {
+		dispatch(a_updateRegisterPhoto(payload))
+	},
+	updateRotation: payload => {
+		dispatch(a_updateRotation(payload))
+	},
+	checkUniq: async payload => {
+		await dispatch(t_checkUniq(payload))
+	},
+	register: async payload => {
+		await dispatch(t_register(payload))
+	}
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Register)

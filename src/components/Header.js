@@ -14,8 +14,13 @@ class Header extends PureComponent {
 		weight: 'kg',
 		metre: 'cm'
 	}
+	logout = () => {
+		const { setAuth } = this.props
+		setAuth(false)
+		localStorage.removeItem('auth')
+	}
 	render() {
-		const { setAuth, auth } = this.props
+		const { auth } = this.props
 		const { weight, metre } = this.state
 		return (
 			<header className="page-header d-flex align-items-start flex-column flex-sm-row">
@@ -27,7 +32,7 @@ class Header extends PureComponent {
 				{auth && (
 					<Link
 						to="/"
-						onClick={() => setAuth(false)}
+						onClick={() => this.logout()}
 						className="btn-link fam-fre font-weight-bold heading my-3 no-wrap"
 					>
 						log out

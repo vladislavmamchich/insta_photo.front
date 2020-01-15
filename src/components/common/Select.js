@@ -102,14 +102,21 @@ class Select extends Component {
         }
     }
     componentDidMount() {
-        const { type, options } = this.props
+        const { type, options, selected } = this.props
+        let selectedOption
         if (options) {
-            this.setState({ options, selectedOption: options[0] })
+            selectedOption = options[0]
+            if (selected) {
+                selectedOption = options.find(o => o === selected) || options[0]
+            }
+            this.setState({ options, selectedOption })
         } else {
-            this.setState({ options: [type], selectedOption: [type][0] })
+            // this.setState({ options: [type], selectedOption: [type][0] })
             switch (type) {
                 case 'sex':
-                    this.setState({ options: sex, selectedOption: sex[0] })
+                    selectedOption =
+                        sex.find(o => o.value === selected) || sex[0]
+                    this.setState({ options: sex, selectedOption })
                     break
                 case 'countries':
                     this.setState({

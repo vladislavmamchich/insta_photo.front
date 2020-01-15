@@ -1,70 +1,76 @@
 import React, { PureComponent } from 'react'
 import { connect } from 'react-redux'
 import { Link } from 'react-router-dom'
+import { toast } from 'react-toastify'
+import i18next from 'i18next'
 
-// import { toast } from 'react-toastify'
-// import i18next from 'i18next'
+import { t_resetPassword } from '../redux/tracks'
 
-// import { t_login } from '../../redux/tracks'
 import Button from '../components/common/Button'
+import Input from '../components/common/Input'
+import Captcha from '../components/service/Captcha'
 
 class ResetPassword extends PureComponent {
 	state = {
 		email: '',
 		secret_word: '',
-		submitting: false
+		submitting: false,
+		captcha: ''
 	}
 
-	// submit = async () => {
-	// 	const { login } = this.props
-	// 	const { email, password, remember_me, submitting } = this.state
-	// 	if (!submitting) {
-	// 		if (email && password) {
-	// 			this.setState({ submitting: true })
-	// 			await login({
-	// 				email,
-	// 				password,
-	// 				remember_me
-	// 			})
-	// 			this.setState({ submitting: false })
-	// 		} else {
-	// 			toast.warn(i18next.t('Fill in all the fields'))
-	// 		}
-	// 	}
-	// }
+	submit = async () => {
+		const { resetPassword } = this.props
+		const { email, secret_word, submitting, captcha } = this.state
+		if (!submitting) {
+			if (email && secret_word && captcha) {
+				this.setState({ submitting: true })
+				try {
+					await resetPassword({
+						email,
+						secret_word,
+						captcha
+					})
+					this.setState({ submitting: false })
+				} catch (err) {
+					this.setState({ submitting: false })
+				}
+			} else {
+				toast.warn(i18next.t('Fill in all the fields'))
+			}
+		}
+	}
 	render() {
-		const { email, secret_word } = this.state
+		const { submitting } = this.state
 		return (
-			<div className="d-flex flex-column align-items-center justify-content-center">
+			<div className="d-flex flex-column m-auto justify-content-center">
 				<div className="text-uppercase mb-3 text-center">
 					reset password
 				</div>
-				<div className="custom-input">
-					<input
-						tabIndex={1}
-						required
-						type="text"
-						placeholder="nickname / email"
-						onChange={e => this.setState({ email: e.target.value })}
-						value={email}
-					/>
-				</div>
-				<div className="custom-input my-2">
-					<input
-						tabIndex={2}
-						required
-						type="text"
-						placeholder="secret word"
-						onChange={e =>
-							this.setState({ secret_word: e.target.value })
-						}
-						value={secret_word}
-					/>
-				</div>
-				<Button label="captcha" className="mt-4 mb-3" />
-				<Button label="submit" />
+				<Input
+					changeHandler={email => this.setState({ email })}
+					placeholder="email"
+					classNames="ml-0"
+				/>
+				<Input
+					changeHandler={secret_word =>
+						this.setState({ secret_word })
+					}
+					placeholder="secret word"
+					classNames="ml-0 my-2"
+				/>
+				<Captcha />
+				<Input
+					classNames="ml-0 mb-3"
+					changeHandler={captcha => this.setState({ captcha })}
+					placeholder="captcha"
+				/>
+				<Button
+					onClick={() => this.submit()}
+					loading={submitting}
+					label="submit"
+				/>
 				<div className="mx-auto mt-4">
-					<Link to="/register">signup</Link>
+					<Link to="/">signup</Link>
 					<span>&nbsp;|&nbsp;</span>
 					<Link to="/login">login</Link>
 				</div>
@@ -78,9 +84,9 @@ const mapStateToProps = state => ({
 	language: state.profile.language
 })
 const mapDispatchToProps = dispatch => ({
-	// login: ({ payload, fail }) => {
-	// 	dispatch(t_login({ payload, fail }))
-	// }
+	resetPassword: async payload => {
+		await dispatch(t_resetPassword(payload))
+	}
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(ResetPassword)

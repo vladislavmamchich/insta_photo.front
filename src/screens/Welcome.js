@@ -7,18 +7,27 @@ import { faCheck } from '@fortawesome/free-solid-svg-icons'
 // import { toast } from 'react-toastify'
 // import i18next from 'i18next'
 
-import { t_login } from '../redux/tracks'
+import { t_subscribe } from '../redux/tracks'
 
 import Button from '../components/common/Button'
 
 class Welcome extends PureComponent {
-	subscribe = async () => {
-		const { history, login } = this.props
-		await login()
-		history.push('/main')
+	state = {
+		subscribing: false
 	}
+	subscribe = async () => {
+		const { history, subscribe } = this.props
+		try {
+			await subscribe()
+			history.push('/profile')
+		} catch (err) {
+			console.log(err)
+		}
+	}
+
 	render() {
 		const { history } = this.props
+		const { subscribing } = this.state
 		return (
 			<div className="d-flex flex-column align-items-center justify-content-center">
 				<div className="w-75 text-center mt-5">
@@ -69,6 +78,7 @@ class Welcome extends PureComponent {
 							onClick={() => this.subscribe()}
 							className="mt-2 w-50"
 							label="subscribe"
+							loading={subscribing}
 						/>
 					</div>
 					<div className="col-xl-2 title-font text-uppercase text-center">
@@ -119,8 +129,8 @@ const mapStateToProps = state => ({
 	language: state.profile.language
 })
 const mapDispatchToProps = dispatch => ({
-	login: async payload => {
-		await dispatch(t_login(payload))
+	subscribe: async payload => {
+		await dispatch(t_subscribe(payload))
 	}
 })
 

@@ -1,7 +1,8 @@
 import io from 'socket.io-client'
 // import { toast } from 'react-toastify'
 
-// import { store } from '../redux/store'
+import { store } from '../redux/store'
+import { t_loadUsers } from '../redux/tracks'
 
 const { REACT_APP_SOCKET_SERVER, REACT_APP_SOCKET_PATH } = process.env
 
@@ -18,7 +19,14 @@ export const connectToSocket = () => {
     })
     if (socket) {
         // const { _id } = store.getState().profile.user
-
+        socket.on('admin_update_users', () => {
+            const { users } = store.getState().users
+            if (users) {
+                store.dispatch(
+                    t_loadUsers({ page: users.page, limit: users.limit })
+                )
+            }
+        })
         socket.on('disconnect', reason => {
             console.log(reason)
             if (reason === 'io server disconnect') {

@@ -16,6 +16,8 @@ import Loader from './components/service/Loader'
 import PrivateRoute from './components/service/PrivateRoute'
 import ServerError from './components/service/ServerError'
 
+import ModalWindow from './components/common/ModalWindow'
+
 import Welcome from './screens/Welcome'
 import Login from './screens/Login'
 import Register from './screens/Register'
@@ -25,6 +27,8 @@ import Main from './screens/Main'
 import Profile from './screens/Profile'
 import Donate from './screens/Donate'
 import User from './screens/User'
+import Admin from './screens/admin'
+import AdminUserInfo from './screens/admin/AdminUserInfo'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 // import 'bootstrap/dist/css/bootstrap-theme.min.css'
@@ -50,7 +54,9 @@ class App extends PureComponent {
     }
 
     render() {
-        const { auth, error } = this.props
+        const {
+            service: { auth, error, isAdmin, modal }
+        } = this.props
         return (
             <Fragment>
                 <ToastContainer />
@@ -59,7 +65,8 @@ class App extends PureComponent {
                 ) : (
                     <Router basename={process.env.REACT_APP_BASENAME}>
                         <div className="container-fluid h-100 d-flex flex-column justify-content-between">
-                            <Header />
+                            {modal && <ModalWindow />}
+                            {!isAdmin && <Header />}
                             <Suspense
                                 fallback={<Loader className="app-loader" />}
                             >
@@ -92,7 +99,7 @@ class App extends PureComponent {
                                     </Fragment>
                                 ) : (
                                     <main className="px-2 px-lg-5">
-                                        <Navs />
+                                        {!isAdmin && <Navs />}
                                         <Switch>
                                             <PrivateRoute
                                                 path="/main"
@@ -110,6 +117,15 @@ class App extends PureComponent {
                                                 path="/user"
                                                 component={User}
                                             />
+                                            <PrivateRoute
+                                                exact
+                                                path="/admin"
+                                                component={Admin}
+                                            />
+                                            <PrivateRoute
+                                                path="/admin/user/:id"
+                                                component={AdminUserInfo}
+                                            />
                                             <Route
                                                 path="/terms"
                                                 component={Terms}
@@ -121,7 +137,7 @@ class App extends PureComponent {
                                     </main>
                                 )}
                             </Suspense>
-                            <Footer />
+                            {!isAdmin && <Footer />}
                         </div>
                     </Router>
                 )}
@@ -131,8 +147,7 @@ class App extends PureComponent {
 }
 
 const mapStateToProps = state => ({
-    auth: state.service.auth,
-    error: state.service.error,
+    service: state.service,
     language: state.profile.language
 })
 

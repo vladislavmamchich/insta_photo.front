@@ -5,7 +5,7 @@ import { connect } from 'react-redux'
 // import { toast } from 'react-toastify'
 // import i18next from 'i18next'
 
-// import { t_login } from '../../redux/tracks'
+import { t_loadProfile } from '../redux/tracks'
 // import Select from '../components/common/Select'
 
 import MyInfo from './profile/MyInfo'
@@ -16,11 +16,13 @@ class Profile extends PureComponent {
 		activeTab: 1
 	}
 	componentDidMount() {
+		this.props.loadProfile()
 		const el = document.querySelector('.logo')
 		el.scrollIntoView({ block: 'start', behavior: 'smooth' })
 	}
 	render() {
 		const { activeTab } = this.state
+		const { data } = this.props
 		return (
 			<Fragment>
 				<ul
@@ -65,7 +67,7 @@ class Profile extends PureComponent {
 					className="tab-content profile-tab-content"
 					id="profile_tabs_content"
 				>
-					{activeTab === 1 && <MyInfo />}
+					{activeTab === 1 && data && <MyInfo />}
 					{activeTab === 2 && <Favourites />}
 				</div>
 			</Fragment>
@@ -75,12 +77,12 @@ class Profile extends PureComponent {
 
 const mapStateToProps = state => ({
 	loading: state.service.loading,
-	language: state.profile.language
+	data: state.profile.data
 })
 const mapDispatchToProps = dispatch => ({
-	// login: ({ payload, fail }) => {
-	// 	dispatch(t_login({ payload, fail }))
-	// }
+	loadProfile: () => {
+		dispatch(t_loadProfile())
+	}
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Profile)

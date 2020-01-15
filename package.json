@@ -14,25 +14,30 @@
     "i18next": "^19.0.2",
     "moment": "^2.24.0",
     "react": "^16.12.0",
+    "react-addons-update": "^15.6.2",
+    "react-country-region-selector": "^1.4.7",
     "react-dom": "^16.12.0",
+    "react-dropzone": "^10.2.1",
+    "react-image-lightbox": "^5.1.1",
     "react-ladda": "^6.0.0",
     "react-redux": "^7.1.3",
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.3.0",
     "react-select": "^3.0.8",
+    "react-table": "^7.0.0-rc.15",
     "react-toastify": "^5.4.1",
     "redux": "^4.0.4",
     "redux-devtools-extension": "^2.13.8",
     "redux-thunk": "^2.3.0",
     "socket.io-client": "^2.3.0",
-    "styled-components": "^5.0.0-rc.2"
+    "styled-components": "^5.0.0-regexrehydrate"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "parse-language": "i18next-scanner --config src/constants/parser_config.js"
+    "parse-language": "i18next-scanner --config parser_config.js"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -50,6 +55,7 @@
     ]
   },
   "devDependencies": {
-    "i18next-scanner": "^2.10.3"
+    "i18next-scanner": "^2.10.3",
+    "namor": "^2.0.2"
   }
 }

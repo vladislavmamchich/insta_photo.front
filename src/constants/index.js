@@ -26,11 +26,19 @@ export const nationalities = [
 	{ label: 'Ukraine', value: 'Ukraine' },
 	{ label: 'Russia', value: 'Russia' }
 ]
-export const ages = [
-	{ label: 'all ages', value: 'all' },
-	{ label: '18', value: '18' },
-	{ label: '25', value: '25' }
-]
+// export const ages = () => {
+// 	let ages = [{ label: 'all ages', value: 'all' }]
+// 	for (let i = 16; i < 90; i++) {
+// 		ages.push({ label: i, value: i })
+// 	}
+// 	return ages
+// }
+export let ages = [{ label: 'all ages', value: 'all' }]
+;(() => {
+	for (let i = 16; i <= 90; i++) {
+		ages.push({ label: i, value: i })
+	}
+})()
 
 export const colors = {
 	coral: '#fc7168',

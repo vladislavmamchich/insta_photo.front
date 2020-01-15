@@ -1,14 +1,24 @@
 import React, { PureComponent } from 'react'
 import { connect } from 'react-redux'
-import i18next from 'i18next'
+// import i18next from 'i18next'
 
 import { a_setModal } from '../../redux/actions'
 
 import Modal from '../service/Modal'
 
 class ModalWindow extends PureComponent {
+	clickButtonHandler = () => {
+		const {
+			modal: { onClick },
+			setModal
+		} = this.props
+		setModal(null)
+		if (onClick instanceof Function) {
+			onClick()
+		}
+	}
 	render() {
-		const { setModal } = this.props
+		const { setModal, modal } = this.props
 		return (
 			<Modal>
 				<div className="modal-window">
@@ -18,20 +28,22 @@ class ModalWindow extends PureComponent {
 							role="document"
 						>
 							<div className="modal-content">
-								<div className="modal-header">
-									<button
-										type="button"
-										className="close"
-										onClick={() => setModal(null)}
-									>
-										<span aria-hidden="true">×</span>
-									</button>
-								</div>
+								{!modal.outClickForbidden && (
+									<div className="modal-header">
+										<button
+											type="button"
+											className="close"
+											onClick={() => setModal(null)}
+										>
+											<span aria-hidden="true">×</span>
+										</button>
+									</div>
+								)}
 								<div className="modal-body align-items-center">
 									<h1 className="text-center h2 text-uppercase mb-5">
-										warning!
+										{modal.title}
 									</h1>
-									<p>
+									{/*									<p>
 										Lorem ipsum dolor sit amet, consectetur
 										adipisicing elit. Cum doloribus eligendi
 										enim inventore similique tempora, unde.
@@ -39,12 +51,13 @@ class ModalWindow extends PureComponent {
 										voluptatibus. Adipisci corporis dolorum
 										maxime nostrum, obcaecati perspiciatis
 										provident.
-									</p>
+									</p>*/}
+									<p>{modal.message}</p>
 								</div>
 								<button
 									type="button"
 									className="btn btn-outline-light d-block mx-auto py-2 px-4 mb-5"
-									onClick={() => setModal(null)}
+									onClick={() => this.clickButtonHandler()}
 								>
 									Yes, I understood
 								</button>
@@ -58,6 +71,7 @@ class ModalWindow extends PureComponent {
 }
 
 const mapStateToProps = state => ({
+	modal: state.service.modal,
 	language: state.profile.language
 })
 const mapDispatchToProps = dispatch => ({

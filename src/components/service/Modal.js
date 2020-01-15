@@ -17,12 +17,18 @@ class Modal extends PureComponent {
     }
 
     componentDidMount() {
-        document.addEventListener('click', this.onOutClick, false)
+        const { modal } = this.props
+        if (!modal.outClickForbidden) {
+            document.addEventListener('click', this.onOutClick, false)
+        }
         modalRoot.appendChild(this.el)
     }
 
     componentWillUnmount() {
-        document.removeEventListener('click', this.onOutClick, false)
+        const { modal } = this.props
+        if (!modal.outClickForbidden) {
+            document.removeEventListener('click', this.onOutClick, false)
+        }
         modalRoot.removeChild(this.el)
         this.body.classList.remove('modal-open')
     }
@@ -40,9 +46,12 @@ class Modal extends PureComponent {
         return ReactDOM.createPortal(this.props.children, this.el)
     }
 }
+const mapStateToProps = state => ({
+    modal: state.service.modal
+})
 const mapDispatchToProps = dispatch => ({
     setModal: payload => {
         dispatch(a_setModal(payload))
     }
 })
-export default connect(null, mapDispatchToProps)(Modal)
+export default connect(mapStateToProps, mapDispatchToProps)(Modal)
