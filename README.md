@@ -3,7 +3,8 @@
 3. git clone https://github.com/vladislavmamchich/insta_photo.front.git
 4. cd insta_photo.front
 5. npm install
-6. npm start
+6. cp .env.example .env
+7. npm start
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
