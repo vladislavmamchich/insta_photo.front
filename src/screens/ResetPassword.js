@@ -19,7 +19,7 @@ class ResetPassword extends PureComponent {
 	}
 
 	submit = async () => {
-		const { resetPassword } = this.props
+		const { resetPassword, history } = this.props
 		const { email, secret_word, submitting, captcha } = this.state
 		if (!submitting) {
 			if (email && secret_word && captcha) {
@@ -30,7 +30,7 @@ class ResetPassword extends PureComponent {
 						secret_word,
 						captcha
 					})
-					this.setState({ submitting: false })
+					history.push('/login')
 				} catch (err) {
 					this.setState({ submitting: false })
 				}

@@ -11,7 +11,8 @@ class Navs extends PureComponent {
 					<ul className="list-clear d-flex m-0 p-0">
 						<li>
 							<NavLink
-								to="/main"
+								to="/"
+								exact
 								className="font-18 fam-fre ml-4"
 								activeClassName="link-active-outline"
 							>

@@ -66,12 +66,12 @@ class App extends PureComponent {
                     <Router basename={process.env.REACT_APP_BASENAME}>
                         <div className="container-fluid h-100 d-flex flex-column justify-content-between">
                             {modal && <ModalWindow />}
-                            {!isAdmin && <Header />}
                             <Suspense
                                 fallback={<Loader className="app-loader" />}
                             >
                                 {!auth ? (
                                     <Fragment>
+                                        {!isAdmin && <Header />}
                                         <Switch>
                                             <Route
                                                 exact
@@ -98,45 +98,50 @@ class App extends PureComponent {
                                         </Switch>
                                     </Fragment>
                                 ) : (
-                                    <main className="px-2 px-lg-5">
-                                        {!isAdmin && <Navs />}
-                                        <Switch>
-                                            <PrivateRoute
-                                                path="/main"
-                                                component={Main}
-                                            />
-                                            <PrivateRoute
-                                                path="/profile"
-                                                component={Profile}
-                                            />
-                                            <PrivateRoute
-                                                path="/donate"
-                                                component={Donate}
-                                            />
-                                            <PrivateRoute
-                                                path="/user"
-                                                component={User}
-                                            />
-                                            <PrivateRoute
-                                                exact
-                                                path="/admin"
-                                                component={Admin}
-                                            />
-                                            <PrivateRoute
-                                                path="/admin/user/:id"
-                                                component={AdminUserInfo}
-                                            />
-                                            <Route
-                                                path="/terms"
-                                                component={Terms}
-                                            />
-                                            <Route
-                                                render={() => <NotFound />}
-                                            />
-                                        </Switch>
-                                    </main>
+                                    <div>
+                                        {!isAdmin && <Header />}
+                                        <main className="px-2 px-lg-5">
+                                            {!isAdmin && <Navs />}
+                                            <Switch>
+                                                <PrivateRoute
+                                                    exact
+                                                    path="/"
+                                                    component={Main}
+                                                />
+                                                <PrivateRoute
+                                                    path="/profile"
+                                                    component={Profile}
+                                                />
+                                                <PrivateRoute
+                                                    path="/donate"
+                                                    component={Donate}
+                                                />
+                                                <PrivateRoute
+                                                    path="/user"
+                                                    component={User}
+                                                />
+                                                <PrivateRoute
+                                                    exact
+                                                    path="/admin"
+                                                    component={Admin}
+                                                />
+                                                <PrivateRoute
+                                                    path="/admin/user/:id"
+                                                    component={AdminUserInfo}
+                                                />
+                                                <Route
+                                                    path="/terms"
+                                                    component={Terms}
+                                                />
+                                                <Route
+                                                    render={() => <NotFound />}
+                                                />
+                                            </Switch>
+                                        </main>
+                                    </div>
                                 )}
                             </Suspense>
+
                             {!isAdmin && <Footer />}
                         </div>
                     </Router>

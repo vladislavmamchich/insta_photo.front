@@ -30,14 +30,23 @@ export default function serviceReducer(
 		case 'SET_IS_ADMIN':
 			return { ...state, isAdmin: payload }
 		case 'UPDATE_REGISTER_PHOTO':
-			const newRegisterPhotos = update(state.registerPhotos, {
-				[payload.index]: { $set: payload.value }
-			})
+			const newRegisterPhotos = payload.reset
+				? []
+				: update(state.registerPhotos, {
+						[payload.index]: { $set: payload.value }
+				  })
 			return { ...state, registerPhotos: newRegisterPhotos }
+		case 'DELETE_LAST_REGISTER_PHOTO':
+			return {
+				...state,
+				registerPhotos: [...state.registerPhotos.slice(0, -1)]
+			}
 		case 'UPDATE_ROTATION':
-			const newRotations = update(state.rotations, {
-				[payload.index]: { $set: payload.value }
-			})
+			const newRotations = payload.reset
+				? Array.from(Array(5).fill(0))
+				: update(state.rotations, {
+						[payload.index]: { $set: payload.value }
+				  })
 			return { ...state, rotations: newRotations }
 
 		default:

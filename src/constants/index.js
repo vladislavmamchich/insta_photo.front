@@ -40,6 +40,8 @@ export let ages = [{ label: 'all ages', value: 'all' }]
 	}
 })()
 
+export const forbiddenKeyCodes = [69, 187, 189, 190]
+
 export const colors = {
 	coral: '#fc7168',
 	white: '#feffff',

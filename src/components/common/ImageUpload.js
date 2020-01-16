@@ -22,8 +22,8 @@ class ImageUpload extends PureComponent {
 		const { onDrop } = this.props
 		return (
 			<Dropzone
-				//maxSize={ newImage.maxSize }
-				//accept={ accept }
+				// maxSize={1024 * 1024}
+				accept={['.jpg', '.png']}
 				multiple={false}
 				onDrop={onDrop}
 				onDropRejected={() =>

@@ -8,6 +8,7 @@ import { CountryDropdown, RegionDropdown } from 'react-country-region-selector'
 import { a_updateRegisterPhoto, a_updateRotation } from '../redux/actions'
 import { debounce } from '../utils/helpers'
 import { t_checkUniq, t_register } from '../redux/tracks'
+import { forbiddenKeyCodes } from '../constants'
 
 import Input from '../components/common/Input'
 import Button from '../components/common/Button'
@@ -16,8 +17,6 @@ import ImageUpload from '../components/common/ImageUpload'
 import AddPhoto from '../components/AddPhoto'
 import Captcha from '../components/service/Captcha'
 
-let photo = []
-// console.log(CountryRegionData)
 class Register extends PureComponent {
 	state = {
 		with_email: false,
@@ -41,7 +40,8 @@ class Register extends PureComponent {
 		age: '',
 		uniq: true,
 		registration: false,
-		captcha: ''
+		captcha: '',
+		imagesArray: []
 	}
 
 	componentDidMount() {
@@ -68,15 +68,22 @@ class Register extends PureComponent {
 	register = async (field, value) => {
 		try {
 			const { register, registerPhotos, history, rotations } = this.props
+			let fields = { ...this.state }
+			let err = false
 			if (!registerPhotos.length) {
 				toast.warning('Choose at least one image')
-			} else {
+				err = true
+			}
+			if (!fields.region) {
+				toast.warning('Choose region')
+				err = true
+			}
+			if (!err) {
 				const payload = new FormData()
 				const l = registerPhotos.length
 				for (let i = 0; i < l; i++) {
 					payload.append('files', registerPhotos[i])
 				}
-				let fields = { ...this.state }
 				fields.uniq = undefined
 				fields.registration = undefined
 				payload.append('data', JSON.stringify(fields))
@@ -110,23 +117,20 @@ class Register extends PureComponent {
 			email,
 			allow_share_email,
 			show_pass,
-			height,
-			weight,
-			chest,
-			waist,
-			thighs,
 			operations,
 			uniq,
 			country,
 			region,
 			registration,
 			nationality,
-			locality
+			locality,
+			imagesArray
 		} = this.state
 		const { registerPhotos, rotations } = this.props
 		const addPhoto =
 			registerPhotos.length < 5 &&
-			registerPhotos.length - 1 === photo.length
+			registerPhotos.length - 1 === imagesArray.length
+		const regionLabel = country === 'United States' ? 'state' : 'region'
 		return (
 			<div className="px-2 px-lg-5">
 				<div className="mt-5 registration">
@@ -300,7 +304,7 @@ class Register extends PureComponent {
 					<hr />
 					<div className="px-0 px-md-4">
 						<div className="row">
-							<div className="col-lg-4 col-md-6 d-flex flex-column flex-md-row">
+							<div className="col-lg-4 col-md-6 d-flex flex-column flex-md-row justify-content-between">
 								<div className="mr-4">
 									<div className="position-relative">
 										<div className="left-asterisk">
@@ -327,9 +331,9 @@ class Register extends PureComponent {
 													})
 												}
 												classes="country-region-select"
-												defaultOptionLabel="region"
+												defaultOptionLabel={regionLabel}
 												disabled={!country}
-												blankOptionLabel="region"
+												blankOptionLabel={regionLabel}
 											/>
 										</div>
 									</div>
@@ -376,96 +380,96 @@ class Register extends PureComponent {
 							<div className="col-lg-5 col-md-6">
 								<div className="row">
 									<div className="col-12 col-md-4">
-										<div className="custom-input with-asterisk my-2 mx-2">
-											<input
-												type="number"
-												name="height"
-												placeholder="height"
-												value={height}
-												onChange={e =>
-													this.setState({
-														height: e.target.value
-													})
-												}
-												min={10}
-												max={300}
-												step={0.1}
-											/>
-										</div>
-										<div className="custom-input with-asterisk my-2 mx-2">
-											<input
-												type="number"
-												name="chest"
-												placeholder="chest"
-												value={chest}
-												onChange={e =>
-													this.setState({
-														chest: e.target.value
-													})
-												}
-												min={10}
-												max={300}
-												step={0.1}
-											/>
-										</div>
+										<Input
+											classNames="with-asterisk mb-2 mx-2"
+											changeHandler={height =>
+												this.setState({ height })
+											}
+											placeholder="height"
+											type="number"
+											min={10}
+											max={300}
+											step={0.1}
+											onKeyDown={e =>
+												forbiddenKeyCodes.includes(
+													e.keyCode
+												) && e.preventDefault()
+											}
+										/>
+										<Input
+											classNames="with-asterisk mb-2 mx-2"
+											changeHandler={chest =>
+												this.setState({ chest })
+											}
+											placeholder="chest"
+											type="number"
+											min={10}
+											max={300}
+											step={0.1}
+											onKeyDown={e =>
+												forbiddenKeyCodes.includes(
+													e.keyCode
+												) && e.preventDefault()
+											}
+										/>
 									</div>
 									<div className="col-12 col-md-4">
-										<div className="custom-input with-asterisk my-2 mx-2">
-											<input
-												type="number"
-												name="waist"
-												placeholder="waist"
-												value={waist}
-												onChange={e =>
-													this.setState({
-														waist: e.target.value
-													})
-												}
-												min={10}
-												max={300}
-												step={0.1}
-											/>
-										</div>
-										<div className="custom-input with-asterisk my-2 mx-2">
-											<input
-												type="number"
-												name="thighs"
-												placeholder="thighs"
-												value={thighs}
-												onChange={e =>
-													this.setState({
-														thighs: e.target.value
-													})
-												}
-												min={10}
-												max={300}
-												step={0.1}
-											/>
-										</div>
+										<Input
+											classNames="with-asterisk mb-2 mx-2"
+											changeHandler={waist =>
+												this.setState({ waist })
+											}
+											placeholder="waist"
+											type="number"
+											min={10}
+											max={300}
+											step={0.1}
+											onKeyDown={e =>
+												forbiddenKeyCodes.includes(
+													e.keyCode
+												) && e.preventDefault()
+											}
+										/>
+										<Input
+											classNames="with-asterisk mb-2 mx-2"
+											changeHandler={thighs =>
+												this.setState({ thighs })
+											}
+											placeholder="thighs"
+											type="number"
+											min={10}
+											max={300}
+											step={0.1}
+											onKeyDown={e =>
+												forbiddenKeyCodes.includes(
+													e.keyCode
+												) && e.preventDefault()
+											}
+										/>
 									</div>
 									<div className="col-12 col-md-4">
-										<div className="custom-input with-asterisk my-2 mx-2">
-											<input
-												type="number"
-												name="weight"
-												placeholder="weight"
-												value={weight}
-												onChange={e =>
-													this.setState({
-														weight: e.target.value
-													})
-												}
-												min={10}
-												max={300}
-												step={0.1}
-											/>
-										</div>
+										<Input
+											classNames="with-asterisk mb-2 mx-2"
+											changeHandler={weight =>
+												this.setState({ weight })
+											}
+											placeholder="weight"
+											type="number"
+											min={10}
+											max={300}
+											step={0.1}
+											onKeyDown={e =>
+												forbiddenKeyCodes.includes(
+													e.keyCode
+												) && e.preventDefault()
+											}
+										/>
 									</div>
 								</div>
 							</div>
 							<div className="col-lg-3">
-								<div className="custom-checkbox my-3">
-									<label tabIndex={9}>
+								<div className="custom-checkbox mb-3">
+									<label>
 										<input
 											onChange={() =>
 												this.setState({
@@ -569,13 +573,30 @@ class Register extends PureComponent {
 								)}
 							</div>
 						</div>
-						{photo.map((i, id) => (
-							<AddPhoto key={id} index={id + 1} />
+						{imagesArray.map((i, id) => (
+							<AddPhoto
+								key={id}
+								index={id + 1}
+								close={() =>
+									this.setState(ps => ({
+										imagesArray: [
+											...ps.imagesArray.slice(0, -1)
+										]
+									}))
+								}
+							/>
 						))}
 						{addPhoto && (
 							<div className="row">
 								<a
-									onClick={() => photo.push(1)}
+									onClick={() =>
+										this.setState(ps => ({
+											imagesArray: [
+												...ps.imagesArray,
+												ps.imagesArray.length
+											]
+										}))
+									}
 									className="mb-5"
 									href="#!"
 								>

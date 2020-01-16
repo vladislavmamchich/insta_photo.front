@@ -6,7 +6,7 @@ import styled from 'styled-components'
 // import i18next from 'i18next'
 
 import { a_setIsAdmin } from '../../redux/actions'
-import { t_loadUserInfo, t_userActivation } from '../../redux/tracks'
+import { t_loadUserInfo, t_userModeration } from '../../redux/tracks'
 
 import Button from '../../components/common/Button'
 import UserPhoto from './UserPhoto'
@@ -31,15 +31,16 @@ const AdminUserInfo = props => {
 		dispatch(t_loadUserInfo({ user_id: params.id }))
 	}, [dispatch, params.id])
 
-	const userActivation = async ({ user_id, is_active }) => {
+	const userModeration = async ({ user_id, moderated }) => {
 		setLoading(true)
-		await dispatch(t_userActivation({ user_id, is_active }))
+		await dispatch(t_userModeration({ user_id, moderated }))
 		setLoading(false)
 	}
 	if (user) {
 		const {
 			_id,
 			is_active,
+			moderated,
 			email,
 			nickname,
 			age,
@@ -65,12 +66,12 @@ const AdminUserInfo = props => {
 					</div>
 					<div className="col-lg-2 col-4">
 						<Button
-							label={is_active ? 'Deactivate' : 'Activate'}
+							label={moderated ? 'Unmoderate' : 'Moderate'}
 							className="w-100 text-capitalize"
 							onClick={() =>
-								userActivation({
+								userModeration({
 									user_id: _id,
-									is_active: !is_active
+									moderated: !moderated
 								})
 							}
 							loading={loading}

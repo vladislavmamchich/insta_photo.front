@@ -6,7 +6,11 @@ import { connect } from 'react-redux'
 // import i18next from 'i18next'
 
 // import { t_login } from '../../redux/tracks'
-import { a_updateRegisterPhoto, a_updateRotation } from '../redux/actions'
+import {
+	a_updateRegisterPhoto,
+	a_updateRotation,
+	a_deleteLastRegisterPhoto
+} from '../redux/actions'
 // import Button from '../components/common/Button'
 // import Select from '../components/common/Select'
 import ImageUpload from './common/ImageUpload'
@@ -17,13 +21,28 @@ class AddPhoto extends PureComponent {
 		updateRegisterPhoto({ index, value: acceptedFiles[0] })
 	}
 
-	rotate() {
+	rotate = () => {
 		const { updateRotation, index, rotations } = this.props
 		let newRotation = rotations[index] + 90
 		if (newRotation >= 360) {
 			newRotation = 0
 		}
 		updateRotation({ index, value: newRotation })
+	}
+
+	deleteImage = () => {
+		const {
+			close,
+			deleteLastRegisterPhoto,
+			registerPhotos,
+			index,
+			updateRotation
+		} = this.props
+		if (registerPhotos.length > index) {
+			deleteLastRegisterPhoto()
+			updateRotation({ index, value: 0 })
+		}
+		close()
 	}
 
 	render() {
@@ -49,10 +68,16 @@ class AddPhoto extends PureComponent {
 					</div>
 				</div>
 				<div className="col-lg-5 d-flex flex-column justify-content-end mb-3">
+					<button
+						onClick={() => this.deleteImage()}
+						className="btn btn-outline-light mr-auto d-flex align-items-center justify-content-center"
+					>
+						<span className="fa fa-times p-1" />
+					</button>
 					{registerPhotos[index] && (
 						<button
 							onClick={() => this.rotate()}
-							className="btn btn-outline-light mr-auto d-flex align-items-center justify-content-center"
+							className="btn btn-outline-light mr-auto d-flex align-items-center justify-content-center mt-5"
 						>
 							<span className="fa fa-redo p-1" />
 						</button>
@@ -71,6 +96,9 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
 	updateRegisterPhoto: payload => {
 		dispatch(a_updateRegisterPhoto(payload))
+	},
+	deleteLastRegisterPhoto: () => {
+		dispatch(a_deleteLastRegisterPhoto())
 	},
 	updateRotation: payload => {
 		dispatch(a_updateRotation(payload))

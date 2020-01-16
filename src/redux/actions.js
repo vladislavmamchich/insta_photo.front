@@ -38,8 +38,8 @@ export const a_setUsers = payload => ({
 	type: 'SET_USERS',
 	payload
 })
-export const a_setUserActivation = payload => ({
-	type: 'SET_USER_ACTIVATION',
+export const a_setUserModeration = payload => ({
+	type: 'SET_USER_MODERATION',
 	payload
 })
 export const a_updateRegisterPhoto = payload => ({
@@ -56,6 +56,10 @@ export const a_updateUserImage = payload => ({
 })
 export const a_setCaptcha = payload => ({
 	type: 'SET_CAPTCHA',
+	payload
+})
+export const a_deleteLastRegisterPhoto = payload => ({
+	type: 'DELETE_LAST_REGISTER_PHOTO',
 	payload
 })
 

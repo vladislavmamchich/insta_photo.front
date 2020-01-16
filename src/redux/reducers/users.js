@@ -15,11 +15,11 @@ export default function usersReducer(state = initialState, { type, payload }) {
 			return { ...state, users: payload }
 		case 'SET_USER_INFO':
 			return { ...state, user: payload }
-		case 'SET_USER_ACTIVATION':
+		case 'SET_USER_MODERATION':
 			return {
 				...state,
 				user: update(state.user, {
-					is_active: { $set: payload.is_active }
+					moderated: { $set: payload.moderated }
 				})
 			}
 		case 'UPDATE_USER_IMAGE':

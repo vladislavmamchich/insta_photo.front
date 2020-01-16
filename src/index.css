@@ -188,7 +188,7 @@ h6,
 	margin: auto;
 }
 .country-region-select {
-	width: 120px;
+	width: 140px;
 	color: var(--white);
 	cursor: pointer;
 	border: none;
@@ -196,7 +196,7 @@ h6,
 		no-repeat right;
 }
 .country-region-select option {
-	width: 120px;
+	width: 140px;
 	color: var(--white);
 	cursor: pointer;
 	border: none;
@@ -209,6 +209,9 @@ select {
 	/*line-height: 1;*/
 	height: 24px;
 	background-position-x: 244px;
+	padding: 0 30px 0 10px !important;
+	-webkit-padding-end: 20px !important;
+	-webkit-padding-start: 5px !important;
 }
 .captcha {
 	border: 1px solid white;

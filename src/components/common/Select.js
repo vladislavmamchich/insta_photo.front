@@ -197,7 +197,7 @@ class Select extends Component {
                 className={`${className || ''}`}
                 //classNamePrefix="react-select"
                 isSearchable={false}
-                width={width || '120px'}
+                width={width || '140px'}
                 placeholder={placeholder}
             />
         )

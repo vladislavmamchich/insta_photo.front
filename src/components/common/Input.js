@@ -13,7 +13,10 @@ const Input = React.forwardRef((props, ref) => {
 	} = props
 	const [value, setValue] = useState('')
 	const changeValue = e => {
-		const { value } = e.target
+		let { value, min, max, type } = e.target
+		if (type === 'number') {
+			value = Math.max(Number(min), Math.min(Number(max), Number(value)))
+		}
 		setValue(value)
 		changeHandler(value)
 	}

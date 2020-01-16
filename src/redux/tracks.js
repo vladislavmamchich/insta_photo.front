@@ -57,6 +57,8 @@ export const t_register = payload => (dispatch, getState) => {
 			attr: payload,
 			success: res => {
 				toast.success(res.msg)
+				dispatch(acts.a_updateRotation({ reset: true }))
+				dispatch(acts.a_updateRegisterPhoto({ reset: true }))
 				resolve()
 			},
 			failFunc: err => {
@@ -77,7 +79,11 @@ export const t_resetPassword = payload => (dispatch, getState) => {
 				resolve()
 			},
 			failFunc: err => {
-				toast.warn(err.msg)
+				if (err.msg) {
+					toast.warn(err.msg)
+				} else {
+					toast.warn(JSON.stringify(err))
+				}
 				reject()
 			}
 		})
@@ -131,14 +137,15 @@ export const t_loadUsers = payload => dispatch => {
 		})
 	})
 }
-export const t_userActivation = payload => dispatch => {
+export const t_userModeration = payload => dispatch => {
 	return new Promise(resolve => {
 		sendRequest({
-			r_path: paths.p_userActivation,
+			r_path: paths.p_userModeration,
 			method: 'patch',
 			attr: payload,
-			success: res => {
-				dispatch(acts.a_setUserActivation(payload))
+			success: ({ msg }) => {
+				toast.success(msg)
+				dispatch(acts.a_setUserModeration(payload))
 				resolve()
 			}
 		})
