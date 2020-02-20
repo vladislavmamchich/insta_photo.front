@@ -1,8 +1,8 @@
 import React from 'react'
 
-const Loader = ({ className, style }) => {
+const Loader = ({ className, style, containerStyle }) => {
 	return (
-		<div className={`loader ${className || ''}`}>
+		<div style={containerStyle} className={`loader ${className || ''}`}>
 			<i className="loader fas fa-spinner fa-pulse" style={style} />
 		</div>
 	)

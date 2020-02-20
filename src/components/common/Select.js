@@ -1,15 +1,7 @@
 import React, { Component } from 'react'
 import ReactSelect from 'react-select'
 
-import {
-    colors,
-    sex,
-    countries,
-    regions,
-    localities,
-    nationalities,
-    ages
-} from '../../constants'
+import { colors, sex, ages } from '../../constants'
 
 const height = 24
 
@@ -92,13 +84,41 @@ class Select extends Component {
         options: [],
         placeholder: 'Select'
     }
+    static getDerivedStateFromProps(nextProps, prevState) {
+        // console.log(
+        //     nextProps.options,
+        //     prevState.options,
+        //     prevState.selectedOption
+        // )
+        if (
+            nextProps.options &&
+            (nextProps.options.length !== prevState.options.length ||
+                JSON.stringify(nextProps.options) !==
+                    JSON.stringify(prevState.options))
+        ) {
+            return {
+                options: nextProps.options,
+                selectedOption: nextProps.options[0]
+            }
+        }
+        return null
+    }
     handleChange = selectedOption => {
         const { onChange } = this.props
-        this.setState({ selectedOption }, () =>
-            console.log(`Option selected:`, this.state.selectedOption)
-        )
+        this.setState({ selectedOption })
         if (onChange instanceof Function) {
             onChange(selectedOption.value)
+        }
+    }
+    componentDidUpdate() {
+        const { selected, options } = this.props
+        const { selectedOption } = this.state
+        if (selected !== undefined && selectedOption.value !== selected) {
+            this.setState({
+                selectedOption:
+                    options.find(o => o === selected || o.value === selected) ||
+                    options[0]
+            })
         }
     }
     componentDidMount() {
@@ -118,58 +138,6 @@ class Select extends Component {
                         sex.find(o => o.value === selected) || sex[0]
                     this.setState({ options: sex, selectedOption })
                     break
-                case 'countries':
-                    this.setState({
-                        options: countries,
-                        selectedOption: countries[0]
-                    })
-                    break
-                case 'country':
-                    this.setState({
-                        options: countries.slice(1),
-                        selectedOption: null,
-                        placeholder: 'country'
-                    })
-                    break
-                case 'regions':
-                    this.setState({
-                        options: regions,
-                        selectedOption: regions[0]
-                    })
-                    break
-                case 'region':
-                    this.setState({
-                        options: regions.slice(1),
-                        selectedOption: null,
-                        placeholder: 'region'
-                    })
-                    break
-                case 'localities':
-                    this.setState({
-                        options: localities,
-                        selectedOption: localities[0]
-                    })
-                    break
-                case 'locality':
-                    this.setState({
-                        options: localities.slice(1),
-                        selectedOption: null,
-                        placeholder: 'locality'
-                    })
-                    break
-                case 'nationalities':
-                    this.setState({
-                        options: nationalities,
-                        selectedOption: nationalities[0]
-                    })
-                    break
-                case 'nationality':
-                    this.setState({
-                        options: nationalities.slice(1),
-                        selectedOption: null,
-                        placeholder: 'nationality'
-                    })
-                    break
                 case 'ages':
                     this.setState({ options: ages, selectedOption: ages[0] })
                     break
@@ -187,7 +155,7 @@ class Select extends Component {
     }
     render() {
         const { selectedOption, options, placeholder } = this.state
-        const { className, width } = this.props
+        const { className, width, isDisabled } = this.props
         return (
             <ReactSelect
                 value={selectedOption}
@@ -199,6 +167,7 @@ class Select extends Component {
                 isSearchable={false}
                 width={width || '140px'}
                 placeholder={placeholder}
+                isDisabled={isDisabled}
             />
         )
     }

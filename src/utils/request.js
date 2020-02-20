@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import { store } from '../redux/store'
+import { connectToSocket, socket } from '../utils/socket'
 import { a_setAuth, a_setError } from '../redux/actions'
 
 const { REACT_APP_SERVER } = process.env
@@ -15,6 +16,12 @@ export default async function sendRequest({
 	full_res = false
 }) {
 	try {
+		const auth = store.getState().service.auth
+		if (auth) {
+			if (!socket) {
+				connectToSocket()
+			}
+		}
 		let response = null
 		let path = REACT_APP_SERVER + r_path
 		if (method !== 'get') {

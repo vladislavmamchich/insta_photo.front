@@ -6,7 +6,6 @@ import { CountryDropdown, RegionDropdown } from 'react-country-region-selector'
 // import i18next from 'i18next'
 
 import { a_updateRegisterPhoto, a_updateRotation } from '../redux/actions'
-import { debounce } from '../utils/helpers'
 import { t_checkUniq, t_register } from '../redux/tracks'
 import { forbiddenKeyCodes } from '../constants'
 
@@ -54,20 +53,26 @@ class Register extends PureComponent {
 		updateRegisterPhoto({ index: 0, value: acceptedFiles[0] })
 	}
 
-	checkUniq = debounce(async () => {
+	checkUniq = async () => {
 		const { checkUniq } = this.props
-		const { email, nickname } = this.state
+		const { email, nickname, with_email } = this.state
 		try {
-			await checkUniq({ email, nickname })
+			await checkUniq({ email, nickname, with_email })
 			this.setState({ uniq: true })
 		} catch (err) {
 			this.setState({ uniq: false })
 		}
-	}, 1000)
+	}
 
 	register = async (field, value) => {
 		try {
-			const { register, registerPhotos, history, rotations } = this.props
+			const {
+				register,
+				registerPhotos,
+				history,
+				rotations,
+				profile: { heightUnit, weightUnit }
+			} = this.props
 			let fields = { ...this.state }
 			let err = false
 			if (!registerPhotos.length) {
@@ -86,7 +91,14 @@ class Register extends PureComponent {
 				}
 				fields.uniq = undefined
 				fields.registration = undefined
-				payload.append('data', JSON.stringify(fields))
+				payload.append(
+					'data',
+					JSON.stringify({
+						...fields,
+						height_unit: heightUnit,
+						weight_unit: weightUnit
+					})
+				)
 				payload.append('rotations', JSON.stringify(rotations))
 				this.setState({ registration: true })
 				await register(payload)
@@ -387,7 +399,7 @@ class Register extends PureComponent {
 											}
 											placeholder="height"
 											type="number"
-											min={10}
+											min={1}
 											max={300}
 											step={0.1}
 											onKeyDown={e =>
@@ -403,7 +415,7 @@ class Register extends PureComponent {
 											}
 											placeholder="chest"
 											type="number"
-											min={10}
+											min={1}
 											max={300}
 											step={0.1}
 											onKeyDown={e =>
@@ -421,7 +433,7 @@ class Register extends PureComponent {
 											}
 											placeholder="waist"
 											type="number"
-											min={10}
+											min={1}
 											max={300}
 											step={0.1}
 											onKeyDown={e =>
@@ -437,7 +449,7 @@ class Register extends PureComponent {
 											}
 											placeholder="thighs"
 											type="number"
-											min={10}
+											min={1}
 											max={300}
 											step={0.1}
 											onKeyDown={e =>
@@ -455,7 +467,7 @@ class Register extends PureComponent {
 											}
 											placeholder="weight"
 											type="number"
-											min={10}
+											min={1}
 											max={300}
 											step={0.1}
 											onKeyDown={e =>
@@ -516,7 +528,7 @@ class Register extends PureComponent {
 							<div className="col-lg-2 mb-3">
 								<ImageUpload onDrop={this.handleImageUpload} />
 								<div className="custom-checkbox mt-2">
-									<label tabIndex={10}>
+									<label>
 										<input
 											defaultChecked
 											disabled
@@ -643,7 +655,7 @@ class Register extends PureComponent {
 const mapStateToProps = state => ({
 	registerPhotos: state.service.registerPhotos,
 	rotations: state.service.rotations,
-	language: state.profile.language
+	profile: state.profile
 })
 const mapDispatchToProps = dispatch => ({
 	updateRegisterPhoto: payload => {

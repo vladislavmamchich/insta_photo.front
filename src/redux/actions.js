@@ -62,4 +62,51 @@ export const a_deleteLastRegisterPhoto = payload => ({
 	type: 'DELETE_LAST_REGISTER_PHOTO',
 	payload
 })
-
+export const a_pushUsersMainImages = payload => ({
+	type: 'PUSH_USERS_MAIN_IMAGES',
+	payload
+})
+export const a_like = payload => ({
+	type: 'LIKE',
+	payload
+})
+// export const a_updateFavourites = payload => ({
+// 	type: 'UPDATE_FAVOURITES',
+// 	payload
+// })
+export const a_addToFavourites = payload => ({
+	type: 'ADD_TO_FAVOURITES',
+	payload
+})
+export const a_removeFromFavourites = payload => ({
+	type: 'REMOVE_FROM_FAVOURITES',
+	payload
+})
+export const a_setFilter = payload => ({
+	type: 'SET_FILTER',
+	payload
+})
+export const a_setModalUser = payload => ({
+	type: 'SET_MODAL_USER',
+	payload
+})
+export const a_clearFilter = payload => ({
+	type: 'CLEAR_FILTER',
+	payload
+})
+export const a_setFavourites = payload => ({
+	type: 'SET_FAVOURITES',
+	payload
+})
+export const a_setHeightUnit = payload => ({
+	type: 'SET_HEIGHT_UNIT',
+	payload
+})
+export const a_setWeightUnit = payload => ({
+	type: 'SET_WEIGHT_UNIT',
+	payload
+})
+export const a_setCountries = payload => ({
+	type: 'SET_COUNTRIES',
+	payload
+})

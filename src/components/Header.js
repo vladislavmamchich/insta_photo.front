@@ -2,32 +2,48 @@ import React, { PureComponent } from 'react'
 import { Link } from 'react-router-dom'
 import { connect } from 'react-redux'
 // import { toast } from 'react-toastify'
-// import i18next from 'i18next'
+import i18next from 'i18next'
 
-import { a_setAuth } from '../redux/actions'
+import {
+	a_setAuth,
+	a_setHeightUnit,
+	a_setWeightUnit,
+	a_setLanguage
+} from '../redux/actions'
 import { languages } from '../constants'
 
 import Select from './common/Select'
 
 class Header extends PureComponent {
-	state = {
-		weight: 'kg',
-		metre: 'cm'
-	}
 	logout = () => {
 		const { setAuth } = this.props
 		setAuth(false)
 		localStorage.removeItem('auth')
 	}
+	changeHeightUnit = (e, unit) => {
+		e.preventDefault()
+		const { setHeightUnit } = this.props
+		setHeightUnit(unit)
+		localStorage.setItem('heightUnit', unit)
+	}
+	changeWeightUnit = (e, unit) => {
+		e.preventDefault()
+		const { setWeightUnit } = this.props
+		setWeightUnit(unit)
+		localStorage.setItem('weightUnit', unit)
+	}
 	render() {
-		const { auth } = this.props
-		const { weight, metre } = this.state
+		const {
+			auth,
+			profile: { heightUnit, weightUnit, language },
+			setLanguage
+		} = this.props
 		return (
 			<header className="page-header d-flex align-items-start flex-column flex-sm-row">
 				<div className="logo mr-4">
-					<a href="/" title="Models" className="fam-fre">
+					<Link to="/" title="Models" className="fam-fre">
 						modelslogo
-					</a>
+					</Link>
 				</div>
 				{auth && (
 					<Link
@@ -35,7 +51,7 @@ class Header extends PureComponent {
 						onClick={() => this.logout()}
 						className="btn-link fam-fre font-weight-bold heading my-3 no-wrap"
 					>
-						log out
+						{i18next.t('log out')}
 					</Link>
 				)}
 
@@ -43,16 +59,16 @@ class Header extends PureComponent {
 					<div className="opts-group d-flex align-items-center mr-3 no-wrap">
 						<a
 							href="#!"
-							onClick={() => this.setState({ weight: 'kg' })}
-							className={weight === 'kg' ? 'active' : ''}
+							onClick={e => this.changeWeightUnit(e, 'kg')}
+							className={weightUnit === 'kg' ? 'active' : ''}
 						>
 							kg
 						</a>
 						<span className="font-gray"> / </span>
 						<a
 							href="#!"
-							onClick={() => this.setState({ weight: 'lb' })}
-							className={weight === 'lb' ? 'active' : ''}
+							onClick={e => this.changeWeightUnit(e, 'lb')}
+							className={weightUnit === 'lb' ? 'active' : ''}
 						>
 							lb
 						</a>
@@ -60,21 +76,26 @@ class Header extends PureComponent {
 					<div className="opts-group d-flex align-items-center mr-3 no-wrap">
 						<a
 							href="#!"
-							onClick={() => this.setState({ metre: 'cm' })}
-							className={metre === 'cm' ? 'active' : ''}
+							onClick={e => this.changeHeightUnit(e, 'cm')}
+							className={heightUnit === 'cm' ? 'active' : ''}
 						>
 							cm
 						</a>
 						<span className="font-gray"> / </span>
 						<a
 							href="#!"
-							onClick={() => this.setState({ metre: 'inch' })}
-							className={metre === 'inch' ? 'active' : ''}
+							onClick={e => this.changeHeightUnit(e, 'inch')}
+							className={heightUnit === 'inch' ? 'active' : ''}
 						>
 							inch
 						</a>
 					</div>
-					<Select width="95px" options={languages} />
+					<Select
+						width="95px"
+						options={languages}
+						onChange={lang => setLanguage(lang)}
+						selected={language}
+					/>
 				</div>
 			</header>
 		)
@@ -82,11 +103,16 @@ class Header extends PureComponent {
 }
 
 const mapStateToProps = state => ({
-	language: state.profile.language,
+	profile: state.profile,
 	auth: state.service.auth
 })
 const mapDispatchToProps = dispatch => ({
-	setAuth: payload => dispatch(a_setAuth(payload))
+	setAuth: payload => dispatch(a_setAuth(payload)),
+	setHeightUnit: payload => dispatch(a_setHeightUnit(payload)),
+	setWeightUnit: payload => dispatch(a_setWeightUnit(payload)),
+	setLanguage: payload => {
+		dispatch(a_setLanguage(payload))
+	}
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Header)

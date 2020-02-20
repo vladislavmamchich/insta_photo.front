@@ -23,7 +23,7 @@ class ImageUpload extends PureComponent {
 		return (
 			<Dropzone
 				// maxSize={1024 * 1024}
-				accept={['.jpg', '.png']}
+				accept={['.jpg', '.png', '.jpeg']}
 				multiple={false}
 				onDrop={onDrop}
 				onDropRejected={() =>

@@ -1,56 +1,77 @@
-import React, { PureComponent } from 'react'
+import React, { PureComponent, Fragment } from 'react'
 import { connect } from 'react-redux'
+import InfiniteScroll from 'react-infinite-scroll-component'
 // import { NavLink } from 'react-router-dom'
 
 // import { toast } from 'react-toastify'
 // import i18next from 'i18next'
 
-// import { t_login } from '../../redux/tracks'
-// import Select from '../../components/common/Select'
+import { t_favouritesFromPage } from '../../redux/tracks'
+
+import FavouriteImage from '../../components/profile/FavouriteImage'
+import Loader from '../../components/service/Loader'
 
 class Favourites extends PureComponent {
+	state = {
+		loading: false
+	}
+	fetchImages = async page => {
+		const { loadFavourites } = this.props
+		this.setState({ loading: true })
+		await loadFavourites({ page })
+		this.setState({ loading: false })
+	}
+	componentDidMount() {
+		// const { favourites } = this.props
+		// if (!favourites || (favourites && favourites.docs.length)) {
+		this.fetchImages(1)
+		// }
+	}
 	render() {
-		return (
-			<div className="tab-pane fade show active">
-				<div className="favourites">
-					<div className="product">
-						<div className="d-flex justify-content-end align-content-stretch meta">
-							<div className="star">
-								<span className="far fa-star" />
-							</div>
-						</div>
-						<img
-							className="img-fluid"
-							src="http://lorempixel.com/600/600"
-							alt="img"
-						/>
-					</div>
-					{Array.from(Array(10).keys()).map(id => (
-						<div key={id} className="product">
-							<div className="d-flex justify-content-end align-content-stretch meta">
-								<div className="star">
-									<span className="far fa-star" />
+		const { favourites } = this.props
+		const { loading } = this.state
+		if (favourites) {
+			return (
+				<div className="tab-pane fade show active">
+					{favourites.docs.length ? (
+						<Fragment>
+							<InfiniteScroll
+								dataLength={favourites.limit}
+								next={() =>
+									this.fetchImages(favourites.nextPage)
+								}
+								hasMore={favourites.hasNextPage}
+								className="favourites"
+							>
+								{favourites.docs.map((i, index) => (
+									<FavouriteImage key={index} image={i} />
+								))}
+							</InfiniteScroll>
+							{loading && (
+								<div className="d-flex justify-content-center align-items-center mt-4">
+									<h4>Loading...</h4>
 								</div>
-							</div>
-						</div>
-					))}
+							)}
+						</Fragment>
+					) : (
+						<div style={{ height: '50vh' }}>No favourites</div>
+					)}
 				</div>
-				<button className="btn-link mx-auto d-block fam-fre font-28 mb-3 mt-5">
-					load more...
-				</button>
-			</div>
-		)
+			)
+		} else {
+			return <Loader containerStyle={{ height: '50vh' }} />
+		}
 	}
 }
 
 const mapStateToProps = state => ({
-	loading: state.service.loading,
+	favourites: state.profile.favourites,
 	language: state.profile.language
 })
 const mapDispatchToProps = dispatch => ({
-	// login: ({ payload, fail }) => {
-	// 	dispatch(t_login({ payload, fail }))
-	// }
+	loadFavourites: () => {
+		dispatch(t_favouritesFromPage())
+	}
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Favourites)

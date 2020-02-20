@@ -1,6 +1,7 @@
 import { toast } from 'react-toastify'
 import moment from 'moment'
 import i18next from 'i18next'
+import { availableLanguages } from '../constants'
 
 export const isValidEmail = email => {
 	var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
@@ -172,11 +173,23 @@ export const isOnline = () => {
 	})
 }
 export const getNavigatorLanguage = () => {
-	return (
-		(navigator.languages && navigator.languages[0]) ||
-		navigator.language ||
-		navigator.userLanguage
-	)
+	// return (
+	// 	(navigator.languages && navigator.languages[0]) ||
+	// 	navigator.language ||
+	// 	navigator.userLanguage
+	// )
+	const locale =
+		[
+			...(navigator.languages || []),
+			navigator.language,
+			navigator.browserLanguage,
+			navigator.userLanguage,
+			navigator.systemLanguage
+		]
+			.filter(Boolean)
+			.map(language => language.substr(0, 2))
+			.find(language => availableLanguages.includes(language)) || 'en'
+	return locale
 }
 export const debounce = (f, ms) => {
 	let isCooldown = false
@@ -186,4 +199,22 @@ export const debounce = (f, ms) => {
 		isCooldown = true
 		setTimeout(() => (isCooldown = false), ms)
 	}
+}
+export const weightConverter = (value, fromUnit, toUnit) => {
+	if (fromUnit === 'kg' && toUnit === 'lb') {
+		return +(value * 2.2046).toFixed(2)
+	}
+	if (fromUnit === 'lb' && toUnit === 'kg') {
+		return +(value / 2.2046).toFixed(2)
+	}
+	return value
+}
+export const heightConverter = (value, fromUnit, toUnit) => {
+	if (fromUnit === 'cm' && toUnit === 'inch') {
+		return +(value / 2.54).toFixed(2)
+	}
+	if (fromUnit === 'inch' && toUnit === 'cm') {
+		return +(value * 2.54).toFixed(2)
+	}
+	return value
 }

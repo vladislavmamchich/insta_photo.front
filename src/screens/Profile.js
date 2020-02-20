@@ -5,18 +5,19 @@ import { connect } from 'react-redux'
 // import { toast } from 'react-toastify'
 // import i18next from 'i18next'
 
-import { t_loadProfile } from '../redux/tracks'
+// import { t_loadProfile } from '../redux/tracks'
 // import Select from '../components/common/Select'
 
 import MyInfo from './profile/MyInfo'
 import Favourites from './profile/Favourites'
+import ChangePassword from './profile/ChangePassword'
 
 class Profile extends PureComponent {
 	state = {
 		activeTab: 1
 	}
 	componentDidMount() {
-		this.props.loadProfile()
+		// this.props.loadProfile()
 		const el = document.querySelector('.logo')
 		el.scrollIntoView({ block: 'start', behavior: 'smooth' })
 	}
@@ -35,12 +36,7 @@ class Profile extends PureComponent {
 							className={`nav-link ${
 								activeTab === 1 ? 'active' : ''
 							}`}
-							id="info-tab"
-							data-toggle="tab"
-							href="#info"
-							role="tab"
-							aria-controls="info"
-							aria-selected="true"
+							href="#!"
 							onClick={() => this.setState({ activeTab: 1 })}
 						>
 							My info
@@ -51,15 +47,21 @@ class Profile extends PureComponent {
 							className={`nav-link ${
 								activeTab === 2 ? 'active' : ''
 							}`}
-							id="fav-tab"
-							data-toggle="tab"
-							href="#fav"
-							role="tab"
-							aria-controls="fav"
-							aria-selected="false"
+							href="#!"
 							onClick={() => this.setState({ activeTab: 2 })}
 						>
 							Favourites
+						</a>
+					</li>
+					<li className="nav-item">
+						<a
+							className={`nav-link ${
+								activeTab === 3 ? 'active' : ''
+							}`}
+							href="#!"
+							onClick={() => this.setState({ activeTab: 3 })}
+						>
+							Change password
 						</a>
 					</li>
 				</ul>
@@ -69,6 +71,7 @@ class Profile extends PureComponent {
 				>
 					{activeTab === 1 && data && <MyInfo />}
 					{activeTab === 2 && <Favourites />}
+					{activeTab === 3 && <ChangePassword />}
 				</div>
 			</Fragment>
 		)
@@ -80,9 +83,9 @@ const mapStateToProps = state => ({
 	data: state.profile.data
 })
 const mapDispatchToProps = dispatch => ({
-	loadProfile: () => {
-		dispatch(t_loadProfile())
-	}
+	// loadProfile: () => {
+	// 	dispatch(t_loadProfile())
+	// }
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Profile)

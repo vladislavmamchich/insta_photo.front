@@ -4,17 +4,19 @@ import { connect } from 'react-redux'
 import i18next from 'i18next'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.min.css'
+import LanguageDetector from 'i18next-browser-languagedetector'
 
 import { languages } from './constants'
 import { a_setLanguage } from './redux/actions'
 
+import Personal from './routes/Personal'
+
 import Header from './components/Header'
 import Footer from './components/Footer'
-import Navs from './components/Navs'
 
 import Loader from './components/service/Loader'
-import PrivateRoute from './components/service/PrivateRoute'
 import ServerError from './components/service/ServerError'
+import Modal from './components/service/Modal'
 
 import ModalWindow from './components/common/ModalWindow'
 
@@ -23,12 +25,6 @@ import Login from './screens/Login'
 import Register from './screens/Register'
 import ResetPassword from './screens/ResetPassword'
 import Terms from './screens/Terms'
-import Main from './screens/Main'
-import Profile from './screens/Profile'
-import Donate from './screens/Donate'
-import User from './screens/User'
-import Admin from './screens/admin'
-import AdminUserInfo from './screens/admin/AdminUserInfo'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 // import 'bootstrap/dist/css/bootstrap-theme.min.css'
@@ -42,15 +38,16 @@ const NotFound = lazy(() => import('./components/service/NotFound'))
 class App extends PureComponent {
     componentDidMount() {
         const { language, setLanguage } = this.props
-        const lng = language ? language.value.toLowerCase() : languages[0].value
-        i18next.init({
-            lng,
+        // const lng = language ? language.value.toLowerCase() : languages[0].value
+        i18next.use(LanguageDetector).init({
+            fallbackLng: 'en',
+            // lng,
             resources: {
                 en: { translation: require('./languages/en.json') },
                 ru: { translation: require('./languages/ru.json') }
             }
         })
-        setLanguage(lng)
+        // setLanguage(lng)
     }
 
     render() {
@@ -65,10 +62,12 @@ class App extends PureComponent {
                 ) : (
                     <Router basename={process.env.REACT_APP_BASENAME}>
                         <div className="container-fluid h-100 d-flex flex-column justify-content-between">
-                            {modal && <ModalWindow />}
-                            <Suspense
-                                fallback={<Loader className="app-loader" />}
-                            >
+                            {modal && (
+                                <Modal>
+                                    {modal.children || <ModalWindow />}
+                                </Modal>
+                            )}
+                            <Suspense fallback={<Loader className="h-100vh" />}>
                                 {!auth ? (
                                     <Fragment>
                                         {!isAdmin && <Header />}
@@ -98,47 +97,7 @@ class App extends PureComponent {
                                         </Switch>
                                     </Fragment>
                                 ) : (
-                                    <div>
-                                        {!isAdmin && <Header />}
-                                        <main className="px-2 px-lg-5">
-                                            {!isAdmin && <Navs />}
-                                            <Switch>
-                                                <PrivateRoute
-                                                    exact
-                                                    path="/"
-                                                    component={Main}
-                                                />
-                                                <PrivateRoute
-                                                    path="/profile"
-                                                    component={Profile}
-                                                />
-                                                <PrivateRoute
-                                                    path="/donate"
-                                                    component={Donate}
-                                                />
-                                                <PrivateRoute
-                                                    path="/user"
-                                                    component={User}
-                                                />
-                                                <PrivateRoute
-                                                    exact
-                                                    path="/admin"
-                                                    component={Admin}
-                                                />
-                                                <PrivateRoute
-                                                    path="/admin/user/:id"
-                                                    component={AdminUserInfo}
-                                                />
-                                                <Route
-                                                    path="/terms"
-                                                    component={Terms}
-                                                />
-                                                <Route
-                                                    render={() => <NotFound />}
-                                                />
-                                            </Switch>
-                                        </main>
-                                    </div>
+                                    <Personal />
                                 )}
                             </Suspense>
 

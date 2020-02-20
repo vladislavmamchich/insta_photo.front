@@ -1,100 +1,237 @@
-import React, { PureComponent } from 'react'
-import { connect } from 'react-redux'
-// import { Link } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+import moment from 'moment'
 
 // import { toast } from 'react-toastify'
 // import i18next from 'i18next'
 
-// import { t_login } from '../../redux/tracks'
-// import Button from '../components/common/Button'
+import {
+	t_loadUser,
+	t_addToFavourites,
+	t_removeFromFavourites
+} from '../redux/tracks'
+import { a_setUserInfo } from '../redux/actions'
+import { socket } from '../utils/socket'
+import { weightConverter, heightConverter } from '../utils/helpers'
 
-class Register extends PureComponent {
-	render() {
+import Loader from '../components/service/Loader'
+import Carousel from '../components/common/Carousel'
+
+const User = props => {
+	const { match, user_id, history, location } = props
+
+	const dispatch = useDispatch()
+	const [index, setSelectedIndex] = useState(0)
+	useEffect(() => {
+		if (user_id >= 0) {
+			dispatch(t_loadUser(user_id))
+		} else if (match && match.params && match.params.id >= 0) {
+			dispatch(t_loadUser(match.params.id))
+		} else {
+			history.push('/')
+		}
+	}, [])
+	const { user } = useSelector(store => store.users)
+	const { heightUnit, weightUnit, data } = useSelector(store => store.profile)
+
+	const like = async image_id => {
+		socket.emit('like', { image_id })
+		if (user.images[index].likes.includes(data._id)) {
+			user.images[index].likes = user.images[index].likes.filter(
+				i => i !== data._id
+			)
+		} else {
+			user.images[index].likes.push(data._id)
+		}
+		dispatch(a_setUserInfo({ ...user, images: user.images }))
+	}
+	const favourite = async () => {
+		if (user.images[index].favourites.includes(data._id)) {
+			dispatch(
+				t_removeFromFavourites({
+					image: user.images[index]
+				})
+			)
+			user.images[index].favourites = user.images[
+				index
+			].favourites.filter(i => i !== data._id)
+		} else {
+			dispatch(
+				t_addToFavourites({
+					image: user.images[index]
+				})
+			)
+			user.images[index].favourites.push(data._id)
+			if (!user.images[index].likes.includes(data._id)) {
+				user.images[index].likes.push(data._id)
+				socket.emit('like', { image_id: user.images[index]._id })
+			}
+		}
+		dispatch(a_setUserInfo({ ...user, images: user.images }))
+	}
+	if (user) {
+		const {
+			height,
+			weight,
+			chest,
+			waist,
+			thighs,
+			country,
+			region,
+			locality,
+			nationality,
+			age,
+			operations,
+			created_at,
+			_id,
+			images,
+			height_unit,
+			weight_unit
+		} = user
+		const is_me = _id === data._id
+		const in_favourites = images[index].favourites.includes(data._id)
+		const regionLabel = country === 'United States' ? 'State' : 'Region'
+		const image_id = location
+			? new URLSearchParams(location.search).get('image_id')
+			: 0
+		const image_index = images.findIndex(i => +i._id === +image_id)
 		return (
 			<div className="product-overview position-relative">
 				<div className="d-flex align-items-center justify-content-between top-line">
-					<p className="font-20">User #1</p>
-					<p className="font-20">User #1</p>
+					<p className="font-20">User #{_id}</p>
+					<p className="font-20">User #{_id}</p>
+				</div>
+				<div className="d-flex justify-content-center">
+					<div
+						style={{ width: '460px' }}
+						className="d-flex justify-content-between mb-3 center-item"
+					>
+						<div
+							onClick={e =>
+								is_me
+									? e.stopPropagation()
+									: like(images[index]._id)
+							}
+							className="likes"
+						>
+							<span
+								className={`${
+									images[index].likes.includes(data._id)
+										? 'fa'
+										: 'far'
+								} fa-heart`}
+							/>
+							<span className="text">
+								{images[index].likes.length}
+							</span>
+						</div>
+						{!is_me && (
+							<div
+								onClick={() => favourite()}
+								className="star px-2"
+							>
+								<span
+									className={`${
+										in_favourites ? 'fa' : 'far'
+									} fa-star`}
+								/>
+							</div>
+						)}
+					</div>
 				</div>
 				<div className="row mt-3">
-					<div className="col-xl-3 col-lg-4 justify-content-center mt-3 mt-md-3 d-flex side-item align-items-center">
-						<img
-							src="http://lorempixel.com/200/200"
-							alt="photo1"
-							className="img-fluid overview-image"
-						/>
-					</div>
-					<div className="col-xl-6 col-lg-4 mt-3 mt-md-3 center-item">
-						<div className="d-flex justify-content-between align-content-stretch mb-3">
-							<div className="likes">
-								<span className="far fa-heart" />
-								<span className="text">20000000</span>
-							</div>
-							<div className="star px-2">
-								<span className="far fa-star" />
-							</div>
-						</div>
-						<img
-							src="http://lorempixel.com/400/600"
-							alt="photo1"
-							className="img-fluid overview-image"
-						/>
-					</div>
-					<div className="col-xl-3 col-lg-4 justify-content-center mt-3 mt-md-3 d-flex side-item align-items-center">
-						<img
-							src="http://lorempixel.com/200/200"
-							alt="photo1"
-							className="img-fluid overview-image"
+					<div className="col-12">
+						<Carousel
+							images={images}
+							setSelectedImage={index => setSelectedIndex(index)}
+							index={image_index}
 						/>
 					</div>
 				</div>
 				<div className="overview-details mt-5 d-flex flex-column flex-xl-row justify-content-center">
-					<div className="d-flex flex-wrap flex-md-nowrap p-2 wrapper">
+					<div className="d-flex flex-wrap p-2 wrapper">
 						<div className="mr-3">
-							<p className="mb-1">Country: Ukraine</p>
-							<p className="mb-1">Region: Kyiv</p>
-						</div>
-						<div className="mr-3">
-							<p className="mb-1">Locality: Kiev</p>
-							<p className="mb-1">Nationality: Ukraine</p>
-						</div>
-					</div>
-					<div className="d-flex flex-wrap flex-md-nowrap p-2 wrapper center">
-						<div className="mr-3">
-							<p className="mb-1">Age: 23</p>
-							<p className="mb-1">Weight: 67 kg</p>
-						</div>
-						<div className="mr-3">
-							<p className="mb-1">Height: 167 cm</p>
-							<p className="mb-1">Chest: 67 cm</p>
-						</div>
-						<div className="mr-3">
-							<p className="mb-1">Weist: 167 cm</p>
-							<p className="mb-1">Thigs: 67 cm</p>
-						</div>
-					</div>
-					<div className="d-flex flex-wrap flex-md-nowrap p-2 wrapper">
-						<div className="mr-3">
-							<p className="mb-1">Operations: no</p>
+							<p className="mb-1">Country: {country}</p>
 							<p className="mb-1">
-								Registration date: 01/01/2019
+								{regionLabel}: {region}
+							</p>
+						</div>
+						<div className="mr-3">
+							<p className="mb-1">Locality: {locality}</p>
+							<p className="mb-1">Nationality: {nationality}</p>
+						</div>
+					</div>
+					<div className="d-flex flex-wrap p-2 wrapper center">
+						<div className="mr-3">
+							<p className="mb-1">Age: {age}</p>
+							<p className="mb-1">
+								Weight:{' '}
+								{weightConverter(
+									weight,
+									weight_unit,
+									weightUnit
+								)}{' '}
+								{weightUnit}
+							</p>
+						</div>
+						<div className="mr-3">
+							<p className="mb-1">
+								Height:{' '}
+								{heightConverter(
+									height,
+									height_unit,
+									heightUnit
+								)}{' '}
+								{heightUnit}
+							</p>
+							<p className="mb-1">
+								Chest:{' '}
+								{heightConverter(
+									chest,
+									height_unit,
+									heightUnit
+								)}{' '}
+								{heightUnit}
+							</p>
+						</div>
+						<div className="mr-3">
+							<p className="mb-1">
+								Waist:{' '}
+								{heightConverter(
+									waist,
+									height_unit,
+									heightUnit
+								)}{' '}
+								{heightUnit}
+							</p>
+							<p className="mb-1">
+								Thigs:{' '}
+								{heightConverter(
+									thighs,
+									height_unit,
+									heightUnit
+								)}{' '}
+								{heightUnit}
+							</p>
+						</div>
+					</div>
+					<div className="d-flex flex-wrap p-2 wrapper">
+						<div className="mr-3">
+							<p className="mb-1">
+								Operations: {operations ? 'yes' : 'no'}
+							</p>
+							<p className="mb-1">
+								Registration date:{' '}
+								{moment(created_at).format('DD/MM/YYYY')}
 							</p>
 						</div>
 					</div>
 				</div>
 			</div>
 		)
+	} else {
+		return <Loader />
 	}
 }
 
-const mapStateToProps = state => ({
-	loading: state.service.loading,
-	language: state.profile.language
-})
-const mapDispatchToProps = dispatch => ({
-	// login: ({ payload, fail }) => {
-	// 	dispatch(t_login({ payload, fail }))
-	// }
-})
-
-export default connect(mapStateToProps, mapDispatchToProps)(Register)
+export default User
