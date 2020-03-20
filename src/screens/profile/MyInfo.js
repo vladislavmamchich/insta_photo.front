@@ -1,8 +1,8 @@
 import React, { PureComponent, Fragment } from 'react'
 import { connect } from 'react-redux'
 import moment from 'moment'
-// import { NavLink } from 'react-router-dom'
-// import { toast } from 'react-toastify'
+import { withRouter } from 'react-router-dom'
+import { toast } from 'react-toastify'
 // import i18next from 'i18next'
 
 import { a_setModal } from '../../redux/actions'
@@ -11,12 +11,18 @@ import {
 	t_email,
 	t_nickname,
 	t_allowShareEmail,
-	t_changeSecretWord
+	t_changeSecretWord,
+	t_updateEmail
 } from '../../redux/tracks'
-import { weightConverter, heightConverter } from '../../utils/helpers'
+import {
+	weightConverter,
+	heightConverter,
+	isValidEmail
+} from '../../utils/helpers'
 
 import Input from '../../components/common/Input'
 import RegisterData from '../../components/profile/RegisterData'
+import Loader from '../../components/service/Loader'
 
 const { REACT_APP_SERVER } = process.env
 
@@ -28,28 +34,38 @@ class MyInfo extends PureComponent {
 		password: '',
 		secret_word: '',
 		register: false,
-		ex_observer: false,
-		allow_share_email: false
+		allow_share_email: false,
+		emailing: false
 	}
+
 	componentDidMount() {
 		const {
 			profile: {
-				data: {
-					nickname,
-					email,
-					secret_word,
-					ex_observer,
-					allow_share_email
-				}
-			}
+				data: { nickname, email, secret_word, allow_share_email }
+			},
+			location: { search },
+			updateEmail,
+			history
 		} = this.props
 		this.setState({
 			nickname,
 			email,
 			secret_word,
-			ex_observer,
 			allow_share_email
 		})
+		if (search) {
+			const searchParams = new URLSearchParams(search.slice(1))
+			if (searchParams.has('emailToken')) {
+				const emailToken = searchParams.get('emailToken')
+				updateEmail({
+					emailToken,
+					cb: email => {
+						this.setState({ email })
+					}
+				})
+				history.push('/profile')
+			}
+		}
 	}
 
 	allowShareEmail = async () => {
@@ -63,7 +79,17 @@ class MyInfo extends PureComponent {
 	}
 	saveEmail = async () => {
 		const { email } = this.state
-		this.props.changeEmail({ email })
+		if (isValidEmail(email)) {
+			try {
+				this.setState({ emailing: true })
+				await this.props.changeEmail({ email })
+				this.setState({ emailing: false })
+			} catch (err) {
+				this.setState({ emailing: false })
+			}
+		} else {
+			toast.warning('Enter valid email')
+		}
 	}
 	saveSecretWord = async () => {
 		const { secret_word } = this.state
@@ -78,12 +104,12 @@ class MyInfo extends PureComponent {
 		} = this.props
 		const {
 			register,
-			ex_observer,
 			nickname,
 			show_pass,
 			email,
 			allow_share_email,
-			secret_word
+			secret_word,
+			emailing
 		} = this.state
 		const isObserver = data.role === 'observer'
 		const {
@@ -102,7 +128,9 @@ class MyInfo extends PureComponent {
 			images,
 			height_unit,
 			weight_unit,
-			moderated
+			moderated,
+			ex_observer,
+			main_photo
 		} = data
 		return (
 			<div className="tab-pane fade show active">
@@ -175,12 +203,17 @@ class MyInfo extends PureComponent {
 									type="email"
 									placeholder="email"
 								/>
-								<button
-									onClick={() => this.saveEmail()}
-									className="ml-3 btn-link link-active-outline"
-								>
-									update
-								</button>
+								<div className="d-flex">
+									<button
+										onClick={() => this.saveEmail()}
+										className="ml-3 btn-link link-active-outline"
+									>
+										update
+									</button>
+									{emailing && (
+										<Loader style={{ fontSize: 14 }} />
+									)}
+								</div>
 							</div>
 							<div className="custom-checkbox ml-4 mt-4">
 								<label tabIndex={5}>
@@ -265,13 +298,7 @@ class MyInfo extends PureComponent {
 							<p className="text-center font-18">
 								become a PARTICIPANT
 							</p>
-							{register && (
-								<RegisterData
-									onSucces={() =>
-										this.setState({ ex_observer: true })
-									}
-								/>
-							)}
+							{register && <RegisterData />}
 						</div>
 					</Fragment>
 				)}
@@ -392,7 +419,7 @@ class MyInfo extends PureComponent {
 												src={REACT_APP_SERVER + i.url}
 												alt="img"
 											/>
-											{i.is_main && (
+											{i._id === main_photo._id && (
 												<div className="is-main-photo">
 													main photo
 												</div>
@@ -423,8 +450,9 @@ class MyInfo extends PureComponent {
 						</div>
 					</Fragment>
 				) : (
-					!moderated && (
-						<div>
+					!moderated &&
+					ex_observer && (
+						<div className="mt-5">
 							Information and photos will appear here, after going
 							through moderation by admin
 						</div>
@@ -459,7 +487,10 @@ const mapDispatchToProps = dispatch => ({
 	},
 	changeSecretWord: async payload => {
 		await dispatch(t_changeSecretWord(payload))
+	},
+	updateEmail: async payload => {
+		await dispatch(t_updateEmail(payload))
 	}
 })
 
-export default connect(mapStateToProps, mapDispatchToProps)(MyInfo)
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(MyInfo))

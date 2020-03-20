@@ -43,9 +43,9 @@ class MainImage extends PureComponent {
 			addToFavourites,
 			removeFromFavourites,
 			image,
-			data: { _id }
+			data: { favourites }
 		} = this.props
-		if (image.favourites.includes(_id)) {
+		if (favourites.includes(image._id)) {
 			removeFromFavourites({ image })
 		} else {
 			addToFavourites({ image })
@@ -57,12 +57,13 @@ class MainImage extends PureComponent {
 	}
 	render() {
 		const {
-			data: { _id, main_photo },
+			data: { _id, main_photo, favourites },
 			image,
-			setModal
+			setModal,
+			totalLikes
 		} = this.props
-		const is_me = image._id === main_photo._id
-		const user_id = image.user._id
+		const is_me = main_photo ? image._id === main_photo._id : false
+		const user_id = is_me ? image.user : image.user._id
 		return (
 			<Link
 				onClick={e => {
@@ -89,13 +90,18 @@ class MainImage extends PureComponent {
 								image.likes.includes(_id) ? 'fa' : 'far'
 							} fa-heart`}
 						/>
-						<span className="text">{image.totalLikes}</span>
+						<div className="d-flex">
+							<span className="text" style={{ lineHeight: 1.8 }}>
+								=
+							</span>
+							<span className="text">{totalLikes[user_id]}</span>
+						</div>
 					</div>
 					{!is_me && (
 						<div onClick={e => this.favourite(e)} className="star">
 							<span
 								className={`${
-									image.favourites.includes(_id)
+									favourites.includes(image._id)
 										? 'fa'
 										: 'far'
 								} fa-star`}
@@ -116,7 +122,8 @@ class MainImage extends PureComponent {
 
 const mapStateToProps = state => ({
 	data: state.profile.data,
-	modal: state.service.modal
+	modal: state.service.modal,
+	totalLikes: state.users.totalLikes
 })
 const mapDispatchToProps = dispatch => ({
 	addToFavourites: async payload => {

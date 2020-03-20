@@ -13,7 +13,7 @@ import Table from './Table'
 
 const colored_tds = ['is_active', 'moderated']
 
-const Admin = props => {
+const Admin = ({ history }) => {
 	const dispatch = useDispatch()
 	const isAdmin = useSelector(store => store.service.isAdmin)
 	const users = useSelector(store => store.users.users)
@@ -102,25 +102,31 @@ const Admin = props => {
 
 	const fetchData = useCallback(
 		async ({ pageSize, pageIndex }) => {
-			// Give this fetch an ID
-			const fetchId = ++fetchIdRef.current
-			setLoading(true)
-			await dispatch(
-				t_loadUsers({ page: pageIndex + 1, limit: pageSize })
-			)
-			// await loadUsers({ page: pageIndex + 1, limit: pageSize })
-			// Only update the data if this is the latest fetch
-			if (fetchId === fetchIdRef.current) {
-				// const startRow = pageSize * pageIndex
-				// const endRow = startRow + pageSize
-				// setData(users ? users.docs : [])
-				// setData(serverData.slice(startRow, endRow))
+			try {
+				// Give this fetch an ID
+				const fetchId = ++fetchIdRef.current
+				setLoading(true)
+				await dispatch(
+					t_loadUsers({ page: pageIndex + 1, limit: pageSize })
+				)
+				// await loadUsers({ page: pageIndex + 1, limit: pageSize })
+				// Only update the data if this is the latest fetch
+				if (fetchId === fetchIdRef.current) {
+					// const startRow = pageSize * pageIndex
+					// const endRow = startRow + pageSize
+					// setData(users ? users.docs : [])
+					// setData(serverData.slice(startRow, endRow))
 
-				// Your server could send back total page count.
-				// For now we'll just fake it, too
-				// setPageCount(Math.ceil(serverData.length / pageSize))
+					// Your server could send back total page count.
+					// For now we'll just fake it, too
+					// setPageCount(Math.ceil(serverData.length / pageSize))
 
-				setLoading(false)
+					setLoading(false)
+				}
+			} catch (err) {
+				if (err === 'Forbidden') {
+					history.push('/')
+				}
 			}
 		},
 		[dispatch]
@@ -195,14 +201,4 @@ const Styles = styled.div`
 		}
 	}
 `
-
-// const mapStateToProps = state => ({
-// 	language: state.profile.language,
-// 	users: state.users.users
-// })
-// const mapDispatchToProps = dispatch => ({
-// 	setIsAdmin: payload => dispatch(a_setIsAdmin(payload)),
-// 	loadUsers: payload => dispatch(t_loadUsers(payload))
-// })
-// export default connect(mapStateToProps, mapDispatchToProps)(Admin)
 export default Admin

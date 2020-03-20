@@ -106,7 +106,15 @@ export const a_setWeightUnit = payload => ({
 	type: 'SET_WEIGHT_UNIT',
 	payload
 })
-export const a_setCountries = payload => ({
-	type: 'SET_COUNTRIES',
+export const a_setGeo = payload => ({
+	type: 'SET_GEO',
+	payload
+})
+export const a_clearMainImages = payload => ({
+	type: 'CLEAR_MAIN_IMAGES',
+	payload
+})
+export const a_setTotalLikes = payload => ({
+	type: 'SET_TOTAL_LIKES',
 	payload
 })

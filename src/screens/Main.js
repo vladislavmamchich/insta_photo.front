@@ -7,7 +7,7 @@ import InfiniteScroll from 'react-infinite-scroll-component'
 // import { toast } from 'react-toastify'
 // import i18next from 'i18next'
 
-import { t_images, t_getCountries } from '../redux/tracks'
+import { t_images, t_getGeo } from '../redux/tracks'
 import { weightConverter, heightConverter } from '../utils/helpers'
 
 import Filters from '../components/main/Filters'
@@ -18,7 +18,7 @@ const Main = () => {
 	const [loading, setLoading] = useState(false)
 	const dispatch = useDispatch()
 	const {
-		data: { main_photo, _id }
+		data: { main_photo, favourites }
 	} = useSelector(store => store.profile)
 	const {
 		images,
@@ -32,7 +32,8 @@ const Main = () => {
 			nationality,
 			region,
 			locality
-		}
+		},
+		totalLikes
 	} = useSelector(store => store.users)
 	const fetchImages = async page => {
 		setLoading(true)
@@ -41,13 +42,13 @@ const Main = () => {
 	}
 	useEffect(() => {
 		const el = document.querySelector('.logo')
-		el.scrollIntoView({ block: 'start', behavior: 'smooth' })
+		el && el.scrollIntoView({ block: 'start', behavior: 'smooth' })
 		// if (!images) {
 		fetchImages(1)
 		// }
 	}, [])
 	useEffect(() => {
-		dispatch(t_getCountries())
+		dispatch(t_getGeo())
 	}, [])
 	const byDate = (a, b) => {
 		const dateA = new Date(a.created_at),
@@ -143,6 +144,12 @@ const Main = () => {
 		})
 		switch (sort) {
 			case 'likes':
+				list = list.map(l => {
+					return {
+						...l,
+						totalLikes: totalLikes[l.user._id]
+					}
+				})
 				return list.sort(byLikesCount)
 			case 'chest':
 				return list.sort(byChest)
@@ -159,38 +166,34 @@ const Main = () => {
 		}
 	}
 	if (images) {
-		if (images.docs.length) {
-			let list = showFavourites
-				? images.docs.filter(
-						i => i.is_main && i.favourites.includes(_id)
-				  )
-				: images.docs
-			// list = showMe
-			// 	? [main_photo, ...list.filter(i => i._id !== main_photo._id)]
-			// 	: list
-			list =
-				country !== 'all'
-					? list.filter(i => i.user.country === country)
-					: list
-			list =
-				region !== 'all'
-					? list.filter(i => i.user.region === region)
-					: list
-			list =
-				locality !== 'all'
-					? list.filter(i => i.user.locality === locality)
-					: list
-			list =
-				nationality !== 'all'
-					? list.filter(i => i.user.nationality === nationality)
-					: list
-			list = age !== 'all' ? list.filter(i => +i.user.age === +age) : list
-			list = showMe ? [main_photo, ...getSorted(list)] : getSorted(list)
-			return (
-				<Fragment>
-					<div className="d-flex justify-content-start">
-						<Filters />
-					</div>
+		let list = showFavourites
+			? images.docs.filter(i => favourites.includes(i._id))
+			: images.docs
+		// list = showMe
+		// 	? [main_photo, ...list.filter(i => i._id !== main_photo._id)]
+		// 	: list
+		list =
+			country !== 'all'
+				? list.filter(i => i.user.country === country)
+				: list
+		list =
+			region !== 'all' ? list.filter(i => i.user.region === region) : list
+		list =
+			locality !== 'all'
+				? list.filter(i => i.user.locality === locality)
+				: list
+		list =
+			nationality !== 'all'
+				? list.filter(i => i.user.nationality === nationality)
+				: list
+		list = age !== 'all' ? list.filter(i => +i.user.age === +age) : list
+		list = showMe ? [main_photo, ...getSorted(list)] : getSorted(list)
+		return (
+			<Fragment>
+				<div className="d-flex justify-content-start">
+					<Filters />
+				</div>
+				{images.docs.length || showMe ? (
 					<InfiniteScroll
 						dataLength={images.limit}
 						next={() => fetchImages(images.nextPage)}
@@ -209,16 +212,17 @@ const Main = () => {
 							<div>Not found</div>
 						)}
 					</InfiniteScroll>
-					{loading && (
-						<div className="d-flex justify-content-center align-items-center mt-4">
-							<h4>Loading...</h4>
-						</div>
-					)}
-				</Fragment>
-			)
-		} else {
-			return <div>Not images yet</div>
-		}
+				) : (
+					<div className="my-5">Not images yet</div>
+				)}
+
+				{loading && (
+					<div className="d-flex justify-content-center align-items-center mt-4">
+						<h4>Loading...</h4>
+					</div>
+				)}
+			</Fragment>
+		)
 	} else {
 		return <Loader containerStyle={{ height: '50vh' }} />
 	}

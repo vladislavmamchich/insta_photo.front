@@ -20,6 +20,16 @@ const Input = React.forwardRef((props, ref) => {
 		setValue(value)
 		changeHandler(value)
 	}
+	const onKeyDown = e => {
+		const { keyCode, target } = e
+		if (
+			keyCode === 32 ||
+			keyCode === 188 ||
+			(target.type !== 'email' && keyCode === 222)
+		) {
+			e.preventDefault()
+		}
+	}
 	return (
 		<div className={`custom-input ${classNames || ''}`}>
 			<input
@@ -29,6 +39,7 @@ const Input = React.forwardRef((props, ref) => {
 				onChange={e => changeValue(e)}
 				onBlur={() => (onBlur ? onBlur() : null)}
 				disabled={disabled}
+				onKeyDown={e => onKeyDown(e)}
 				{...rest}
 			/>
 			{label && <label>{label}</label>}

@@ -20,7 +20,9 @@ const initialState = {
 	images: null,
 	filter: initialFilter,
 	modalUser: null,
-	countries: null
+	totalLikes: null,
+	countries: null,
+	nationalities: null
 }
 
 export default function usersReducer(state = initialState, { type, payload }) {
@@ -29,7 +31,8 @@ export default function usersReducer(state = initialState, { type, payload }) {
 			return { ...state, all: payload }
 		case 'PUSH_USERS_MAIN_IMAGES':
 			if (state.images) {
-				if (state.images.page !== payload.images.page) {
+				// console.log(state.images.page, payload.images.page)
+				if (state.images.page < payload.images.page) {
 					return {
 						...state,
 						images: {
@@ -41,7 +44,8 @@ export default function usersReducer(state = initialState, { type, payload }) {
 			} else {
 				return {
 					...state,
-					images: payload.images.totalDocs > 0 ? payload.images : null
+					images: payload.images
+					// images: payload.images.totalDocs > 0 ? payload.images : null
 				}
 			}
 			return state
@@ -95,50 +99,50 @@ export default function usersReducer(state = initialState, { type, payload }) {
 				}
 			}
 			return state
-		case 'ADD_TO_FAVOURITES':
-			if (state.images) {
-				let {
-					data: { _id },
-					image_id
-				} = payload
-				const index = state.images.docs.findIndex(
-					i => i._id === image_id
-				)
-				if (index >= 0) {
-					return {
-						...state,
-						images: update(state.images, {
-							docs: { [index]: { favourites: { $push: [_id] } } }
-						})
-					}
-				}
-			}
-			return state
-		case 'REMOVE_FROM_FAVOURITES':
-			if (state.images) {
-				let {
-					data: { _id },
-					image_id
-				} = payload
-				let { docs } = state.images
-				const index = docs.findIndex(i => i._id === image_id)
-				if (index >= 0) {
-					const favourites = docs[index].favourites.filter(
-						i => i !== _id
-					)
-					return {
-						...state,
-						images: update(state.images, {
-							docs: {
-								[index]: {
-									favourites: { $set: favourites }
-								}
-							}
-						})
-					}
-				}
-			}
-			return state
+		// case 'ADD_TO_FAVOURITES':
+		// 	if (state.images) {
+		// 		let {
+		// 			data: { _id },
+		// 			image_id
+		// 		} = payload
+		// 		const index = state.images.docs.findIndex(
+		// 			i => i._id === image_id
+		// 		)
+		// 		if (index >= 0) {
+		// 			return {
+		// 				...state,
+		// 				images: update(state.images, {
+		// 					docs: { [index]: { favourites: { $push: [_id] } } }
+		// 				})
+		// 			}
+		// 		}
+		// 	}
+		// 	return state
+		// case 'REMOVE_FROM_FAVOURITES':
+		// 	if (state.images) {
+		// 		let {
+		// 			data: { _id },
+		// 			image_id
+		// 		} = payload
+		// 		let { docs } = state.images
+		// 		const index = docs.findIndex(i => i._id === image_id)
+		// 		if (index >= 0) {
+		// 			const favourites = docs[index].favourites.filter(
+		// 				i => i !== _id
+		// 			)
+		// 			return {
+		// 				...state,
+		// 				images: update(state.images, {
+		// 					docs: {
+		// 						[index]: {
+		// 							favourites: { $set: favourites }
+		// 						}
+		// 					}
+		// 				})
+		// 			}
+		// 		}
+		// 	}
+		// 	return state
 		case 'SET_FILTER':
 			let { field, value } = payload
 			return {
@@ -152,8 +156,13 @@ export default function usersReducer(state = initialState, { type, payload }) {
 			}
 		case 'SET_MODAL_USER':
 			return { ...state, modalUser: payload }
-		case 'SET_COUNTRIES':
-			return { ...state, countries: payload }
+		case 'SET_GEO':
+			const { countries, nationalities } = payload
+			return { ...state, countries, nationalities }
+		case 'CLEAR_MAIN_IMAGES':
+			return { ...state, images: null }
+		case 'SET_TOTAL_LIKES':
+			return { ...state, totalLikes: payload }
 		default:
 			return state
 	}

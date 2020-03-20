@@ -8,7 +8,9 @@ import {
 	a_setAuth,
 	a_setHeightUnit,
 	a_setWeightUnit,
-	a_setLanguage
+	a_setLanguage,
+	a_setProfile,
+	a_clearMainImages
 } from '../redux/actions'
 import { languages } from '../constants'
 
@@ -16,8 +18,10 @@ import Select from './common/Select'
 
 class Header extends PureComponent {
 	logout = () => {
-		const { setAuth } = this.props
+		const { setAuth, setProfile, clearMainImages } = this.props
 		setAuth(false)
+		setProfile(null)
+		clearMainImages()
 		localStorage.removeItem('auth')
 	}
 	changeHeightUnit = (e, unit) => {
@@ -41,9 +45,9 @@ class Header extends PureComponent {
 		return (
 			<header className="page-header d-flex align-items-start flex-column flex-sm-row">
 				<div className="logo mr-4">
-					<Link to="/" title="Models" className="fam-fre">
+					<a href="/" title="Models" className="fam-fre">
 						modelslogo
-					</Link>
+					</a>
 				</div>
 				{auth && (
 					<Link
@@ -108,6 +112,8 @@ const mapStateToProps = state => ({
 })
 const mapDispatchToProps = dispatch => ({
 	setAuth: payload => dispatch(a_setAuth(payload)),
+	setProfile: payload => dispatch(a_setProfile(payload)),
+	clearMainImages: payload => dispatch(a_clearMainImages(payload)),
 	setHeightUnit: payload => dispatch(a_setHeightUnit(payload)),
 	setWeightUnit: payload => dispatch(a_setWeightUnit(payload)),
 	setLanguage: payload => {

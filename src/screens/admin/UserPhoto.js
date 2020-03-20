@@ -44,11 +44,13 @@ const UserPhoto = ({ image, main_photo, index }) => {
 			setAction('changing')
 			await dispatch(
 				t_changeMainPhotoAdmin({
-					user_id: user._id,
-					main_photo: image._id
+					payload: {
+						user_id: user._id,
+						main_photo: image._id
+					},
+					image
 				})
 			)
-			// dispatch(a_setUserInfo({ ...user, main_photo: image._id }))
 			setAction(null)
 		}
 	}
@@ -61,9 +63,10 @@ const UserPhoto = ({ image, main_photo, index }) => {
 					image_id: image._id
 				})
 			)
+			setAction(null)
 		}
 	}
-	const checked = image._id === main_photo
+	const checked = main_photo ? image._id === main_photo._id : false
 
 	return (
 		<div className="row mb-5">

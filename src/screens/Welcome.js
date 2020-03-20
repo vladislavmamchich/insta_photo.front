@@ -29,7 +29,7 @@ class Welcome extends PureComponent {
 		const { history } = this.props
 		const { subscribing } = this.state
 		return (
-			<div className="d-flex flex-column align-items-center justify-content-center">
+			<div className="container d-flex flex-column align-items-center justify-content-center">
 				<div className="w-75 text-center mt-5">
 					Lorem Ipsum is simply dummy text of the printing and
 					typesetting industry. Lorem Ipsum has been the industry's
@@ -40,7 +40,7 @@ class Welcome extends PureComponent {
 				</div>
 				<h1 className="my-4">how to use</h1>
 				<div className="d-flex align-items-center justify-content-center w-75 row">
-					<div className="col-xl-5 col-sm-10 col-12 welcome-block">
+					<div className="col-lg-5 col-sm-10 col-12 welcome-block">
 						<div className="title">observer</div>
 						<div className="d-flex justify-content-between w-100">
 							<div className="m-2">
@@ -81,10 +81,10 @@ class Welcome extends PureComponent {
 							loading={subscribing}
 						/>
 					</div>
-					<div className="col-xl-2 title-font text-uppercase text-center">
+					<div className="col-lg-1 col-md-12 title-font text-uppercase text-center">
 						or
 					</div>
-					<div className="col-xl-5 col-sm-10 col-12 welcome-block">
+					<div className="col-lg-5 col-sm-10 col-12 welcome-block">
 						<div className="title">participant</div>
 						<div className="d-flex justify-content-between w-100">
 							<div>

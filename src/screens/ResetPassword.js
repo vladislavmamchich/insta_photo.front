@@ -50,6 +50,7 @@ class ResetPassword extends PureComponent {
 					changeHandler={email => this.setState({ email })}
 					placeholder="email"
 					classNames="ml-0"
+					type="email"
 				/>
 				<Input
 					changeHandler={secret_word =>

@@ -68,7 +68,14 @@ body,
 .product-overview .center-item .likes .text,
 .user-images .image .likes .text {
   font-family: 'Fredoka One', cursive;
+}
+.fam-fre {
   font-size: 18px;
+}
+.product .likes .text,
+.product-overview .center-item .likes .text,
+.user-images .image .likes .text {
+  font-size: 12px;
 }
 
 .btn-link,
@@ -89,7 +96,7 @@ a:focus {
 }
 .btn-link.active,
 a.active {
-  color: #007fff;
+  color: var(--blue);
 }
 
 .no-wrap,
@@ -121,8 +128,9 @@ footer .position-absolute {
 }
 
 hr {
-  background: #c9c9c9;
-  height: 2px;
+  /*background: #c9c9c9;*/
+  background: var(--white);
+  /*height: 2px;*/
   margin: 20px 0;
 }
 
@@ -171,80 +179,15 @@ hr {
 
 .opts-group .active {
   pointer-events: none;
-  color: #007fff;
+  color: var(--blue);
   font-weight: bold;
 }
 
 .link-active-outline,
 .opts-group .active {
   -webkit-text-stroke: 0.4px var(--white);
-  -webkit-text-fill-color: #007fff;
+  -webkit-text-fill-color: var(--blue);
 }
-
-/*.custom-dropdown {
-  position: relative;
-}
-.custom-dropdown .dropdown-btn {
-  padding: 1px 6px;
-  background: transparent;
-  border: 1px solid transparent;
-  color: var(--white);
-  border-radius: 0;
-}
-.custom-dropdown .dropdown-btn:focus {
-  border-color: var(--white);
-  outline: none;
-}
-.custom-dropdown--menu {
-  overflow: hidden;
-  background-color: var(--coral);
-  z-index: 50;
-  border: 1px solid var(--white);
-  position: absolute;
-  min-width: unset !important;
-  width: 100%;
-  top: -50px;
-  display: -webkit-box;
-  display: flex;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-  flex-flow: column;
-  opacity: 0;
-  visibility: hidden;
-  border-radius: 0;
-  box-shadow: 0 0 5px rgba(254, 255, 255, 0.3);
-  -webkit-transition: 0.2s;
-  transition: 0.2s;
-  padding: 0;
-}
-.custom-dropdown--menu.active,
-.custom-dropdown--menu.show {
-  top: 100%;
-  visibility: visible;
-  opacity: 1;
-  -webkit-transition: 0.2s;
-  transition: 0.2s;
-}
-.custom-dropdown--menu .menu-item {
-  background-color: var(--coral);
-  -webkit-box-align: center;
-  align-items: center;
-  -webkit-box-pack: justify;
-  justify-content: space-between;
-  display: -webkit-box;
-  display: flex;
-  border-bottom: 1px solid rgba(254, 255, 255, 0.6);
-  color: var(--white);
-}
-.custom-dropdown--menu .menu-item .fa {
-  font-size: 10px;
-  margin-top: -5px;
-  color: transparent;
-}
-.custom-dropdown--menu .menu-item.selected .fa {
-  color: var(--white);
-}*/
-
 .custom-checkbox label {
   display: -webkit-box;
   display: flex;
@@ -262,7 +205,6 @@ hr {
 .custom-checkbox label input[type='email'] {
   display: block;
 }
-
 .custom-checkbox .checkbox-icon {
   width: 14px;
   height: 14px;
@@ -309,7 +251,6 @@ hr {
 }
 
 .prod-options {
-  box-shadow: 0 0 0 5px #e16c65;
   padding: 16px;
   align-self: flex-start;
   margin-right: 14px;
@@ -338,10 +279,9 @@ hr {
     grid-template-columns: 1fr;
   }
 }
-
 .product,
 .product-overview .center-item {
-  border: 3px solid var(--white);
+  border: 2px solid var(--white);
   position: relative;
   height: 320px;
   -webkit-transition: 0.2s;
@@ -380,13 +320,14 @@ hr {
 .product-overview .center-item:hover,
 .product.active,
 .product-overview .active.center-item {
-  border-color: #007fff;
+  border-color: var(--blue);
 }
 .product:hover .likes,
+.product:hover .star,
 .product-overview .center-item:hover .likes,
 .product.active .likes,
 .product-overview .active.center-item .likes {
-  background: #007fff;
+  background: var(--blue);
 }
 .product:hover .likes .text,
 .product-overview .center-item:hover .likes .text,
@@ -395,6 +336,7 @@ hr {
   color: var(--white);
 }
 .product:hover .likes .fa,
+.product:hover .star .fa,
 .product-overview .center-item:hover .likes .fa,
 .product.active .likes .fa,
 .product-overview .active.center-item .likes .fa {
@@ -402,14 +344,15 @@ hr {
 }
 .product .star,
 .product-overview .center-item .star {
-  height: 60px;
-  padding: 2px;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-  flex-direction: column;
+  width: 45px;
+  height: 45px;
+  /*padding: 2px;*/
+  /*-webkit-box-orient: vertical;*/
+  /*-webkit-box-direction: normal;*/
+  /*flex-direction: column;*/
   -webkit-transition: 0.2s;
   transition: 0.2s;
-  align-self: flex-start;
+  /*align-self: flex-start;*/
   display: -webkit-box;
   display: flex;
   -webkit-box-align: center;
@@ -417,15 +360,17 @@ hr {
   -webkit-box-pack: center;
   justify-content: center;
   background: var(--white);
-  color: #e96c64;
+  /*color: var(--coral);*/
   z-index: 99;
   cursor: pointer;
+  margin-top: -2px;
+  margin-right: -2px;
 }
 .product .star .fa,
 .product-overview .center-item .star .fa,
 .product .star .far,
 .product-overview .center-item .star .far {
-  font-size: 30px;
+  font-size: 20px;
   color: #f7cc68;
 }
 .product .star .fa,
@@ -435,8 +380,9 @@ hr {
 }
 .product .likes,
 .product-overview .center-item .likes {
-  height: 60px;
-  padding: 2px;
+  width: 45px;
+  height: 45px;
+  padding: 4px;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
   flex-direction: column;
@@ -448,20 +394,23 @@ hr {
   -webkit-box-align: center;
   align-items: center;
   -webkit-box-pack: center;
-  justify-content: center;
+  /*justify-content: center;*/
   background: var(--white);
-  color: #e96c64;
+  color: var(--coral);
   z-index: 99;
   cursor: pointer;
+  margin-top: -2px;
+  margin-left: -2px;
 }
 .product .likes .text,
 .product-overview .center-item .likes .text {
   -webkit-transition: 0.2s;
   transition: 0.2s;
+  color: var(--black);
 }
 .product .likes .fa,
 .product-overview .center-item .likes .fa {
-  -webkit-text-stroke: 3px #e96c64;
+  -webkit-text-stroke: 3px var(--coral);
   -webkit-text-fill-color: #dc3545;
 }
 .product .likes .fa,
@@ -470,14 +419,14 @@ hr {
 .product-overview .center-item .likes .far {
   -webkit-transition: 0.2s;
   transition: 0.2s;
-  font-size: 30px;
+  font-size: 20px;
 }
 
 .registration,
 .profile-tab-content,
 .product-overview {
-  border-top: 1px solid var(--black);
-  border-left: 1px solid var(--black);
+  border-top: 1px solid var(--white);
+  border-left: 1px solid var(--white);
   padding: 20px;
   /*height: 100%;*/
 }
@@ -525,7 +474,7 @@ hr {
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: #007fff;
+  background: var(--blue);
   margin: 1.5px auto;
   display: block;
 }
@@ -547,6 +496,7 @@ hr {
   transition: 0.2s;
   color: var(--white);
   border-bottom: 1px solid #c9c9c9;
+  /*border-bottom: 1px solid var(--white);*/
   border-top: none;
   border-left: none;
   border-right: none;
@@ -608,7 +558,7 @@ hr {
   border-right-color: transparent !important;
   background: var(--coral) !important;
   z-index: 10;
-  border-bottom-color: var(--black) !important;
+  border-bottom-color: var(--white) !important;
 }
 .profile-tabs .nav-link:focus {
   outline: none;
@@ -616,24 +566,31 @@ hr {
 }
 .profile-tabs .nav-link.active {
   border-bottom-color: transparent !important;
-  border-top-color: var(--black) !important;
-  border-right-color: var(--black) !important;
-  border-left-color: var(--black) !important;
+  border-top-color: var(--white) !important;
+  border-right-color: var(--white) !important;
+  border-left-color: var(--white) !important;
 }
 
 .favourites {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-gap: 20px;
-  padding: 0 80px;
+  /*padding: 0 80px;*/
+  padding: 0 60px;
 }
 @media screen and (max-width: 1200px) {
   .favourites {
     padding: 0 30px;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 @media screen and (max-width: 990px) {
+  .favourites {
+    padding: 0 20px;
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media screen and (max-width: 500px) {
   .favourites {
     padding: 0 20px;
     grid-template-columns: 1fr;
@@ -687,7 +644,7 @@ hr {
   -webkit-box-pack: center;
   justify-content: center;
   background: var(--white);
-  color: #e96c64;
+  color: var(--coral);
   position: absolute;
   /*left: 2px;*/
   /*top: 2px;*/
@@ -698,7 +655,7 @@ hr {
   transition: 0.2s;
 }
 .user-images .image .likes .fa {
-  -webkit-text-stroke: 3px #e96c64;
+  -webkit-text-stroke: 3px var(--coral);
   -webkit-text-fill-color: #dc3545;
 }
 .user-images .image .likes .fa,

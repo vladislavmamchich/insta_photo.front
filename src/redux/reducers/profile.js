@@ -4,7 +4,7 @@ import { getNavigatorLanguage } from '../../utils/helpers'
 
 const initialState = {
 	data: null,
-	language: getNavigatorLanguage(),
+	language: localStorage.getItem('language') || getNavigatorLanguage(),
 	favourites: null,
 	heightUnit: localStorage.getItem('heightUnit') || 'cm',
 	weightUnit: localStorage.getItem('weightUnit') || 'kg'
@@ -26,7 +26,7 @@ export default function profileReducer(
 				if (state.favourites.page !== payload.images.page) {
 					return {
 						...state,
-						images: {
+						favourites: {
 							...payload.images,
 							docs: [
 								...state.favourites.docs,

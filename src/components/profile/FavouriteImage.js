@@ -5,65 +5,75 @@ import { connect } from 'react-redux'
 // import { toast } from 'react-toastify'
 // import i18next from 'i18next'
 
-import { t_addToFavourites, t_removeFromFavourites } from '../../redux/tracks'
-
-import Window from '../../components/common/Window'
-import User from '../../screens/User'
+import { t_removeFromFavourites } from '../../redux/tracks'
 
 const { REACT_APP_SERVER } = process.env
 
 class FavouriteImage extends PureComponent {
 	state = {
-		open: false
+		in_favourites: true
 	}
 	favourite = async e => {
 		e.preventDefault()
 		e.stopPropagation()
-		const {
-			addToFavourites,
-			removeFromFavourites,
-			image,
-			data: { _id }
-		} = this.props
-		if (image.favourites.includes(_id)) {
-			removeFromFavourites({ image })
+		if (this.state.in_favourites) {
+			this.setState({ in_favourites: false })
 		} else {
-			addToFavourites({ image })
+			this.setState({ in_favourites: true })
 		}
 	}
+
+	// componentDidMount() {
+	// 	window.addEventListener('beforeunload', this.onBeforeUnload)
+	// }
+
+	// onBeforeUnload = e => {
+	// 	// e.preventDefault()
+	// 	// e.returnValue = `Are you sure you want to leave?`
+	// 	// console.log(this.state.in_favourites)
+	// 	if (!this.state.in_favourites) {
+	// 		const { removeFromFavourites, image } = this.props
+	// 		removeFromFavourites({ image })
+	// 	}
+	// 	// e.returnValue = `Are you sure you want to leave?`
+	// }
+
+	componentWillUnmount() {
+		// window.removeEventListener('beforeunload', this.onBeforeUnload)
+		if (!this.state.in_favourites) {
+			const { removeFromFavourites, image } = this.props
+			removeFromFavourites({ image: image.original })
+		}
+	}
+
 	render() {
-		const {
-			image,
-			data: { _id }
-		} = this.props
-		const { open } = this.state
+		const { image } = this.props
+		const { in_favourites } = this.state
 		return (
 			<div
-				onClick={() => this.setState({ open: true })}
+				onClick={() =>
+					window.open(
+						`/user/${image.original.user}?image_id=${image.original._id}`,
+						`${new Date()}`,
+						'left=20'
+					)
+				}
 				className="product"
 			>
 				<div className="d-flex justify-content-end align-content-stretch meta">
 					<div onClick={e => this.favourite(e)} className="star">
 						<span
 							className={`${
-								image.favourites.includes(_id) ? 'fa' : 'far'
+								in_favourites ? 'fa' : 'far'
 							} fa-star`}
 						/>
 					</div>
 				</div>
 				<img
 					className="img-fluid"
-					src={REACT_APP_SERVER + image.url}
+					src={REACT_APP_SERVER + image.original.url}
 					alt="img"
 				/>
-				{open && (
-					<Window
-						url={`/user/${image.user._id}?image_id=${image._id}`}
-						onUnload={() => this.setState({ open: false })}
-					>
-						<User user_id={image.user._id} image_id={image._id} />
-					</Window>
-				)}
 			</div>
 		)
 	}
@@ -75,9 +85,6 @@ const mapStateToProps = state => ({
 	data: state.profile.data
 })
 const mapDispatchToProps = dispatch => ({
-	addToFavourites: async payload => {
-		await dispatch(t_addToFavourites(payload))
-	},
 	removeFromFavourites: async payload => {
 		await dispatch(t_removeFromFavourites(payload))
 	}

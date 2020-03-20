@@ -1,13 +1,15 @@
-import React, { PureComponent } from 'react'
+import React, { PureComponent, Fragment } from 'react'
 import { connect } from 'react-redux'
 import { Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { CountryDropdown, RegionDropdown } from 'react-country-region-selector'
 // import i18next from 'i18next'
+// import Geonames from 'geonames.js'
 
 import { a_updateRegisterPhoto, a_updateRotation } from '../redux/actions'
-import { t_checkUniq, t_register } from '../redux/tracks'
+import { t_checkUniq, t_register, t_emailRegister } from '../redux/tracks'
 import { forbiddenKeyCodes } from '../constants'
+import { isValidEmail } from '../utils/helpers'
 
 import Input from '../components/common/Input'
 import Button from '../components/common/Button'
@@ -15,6 +17,14 @@ import Select from '../components/common/Select'
 import ImageUpload from '../components/common/ImageUpload'
 import AddPhoto from '../components/AddPhoto'
 import Captcha from '../components/service/Captcha'
+import FullWindowLoader from '../components/service/FullWindowLoader'
+
+// const geonames = new Geonames({
+// 	username: 'myusername',
+// 	lan: 'ru',
+// 	encoding: 'JSON'
+// })
+// const geonames = getGeonames()
 
 class Register extends PureComponent {
 	state = {
@@ -41,12 +51,44 @@ class Register extends PureComponent {
 		registration: false,
 		captcha: '',
 		imagesArray: []
+		// countries: [],
+		// regions: []
 	}
 
-	componentDidMount() {
+	async componentDidMount() {
 		const el = document.querySelector('.logo')
 		el.scrollIntoView({ block: 'start', behavior: 'smooth' })
+		// try {
+		// 	let countries = await geonames.countryInfo({})
+		// 	// countries = countries.geonames.map(c => {
+		// 	// 	return {
+		// 	// 		label: c.countryName,
+		// 	// 		value: c.countryCode,
+		// 	// 		id: c.geonameId
+		// 	// 	}
+		// 	// })
+		// 	// this.setState({ countries })
+		// 	console.log('countries', countries)
+		// 	const states = await geonames.children({
+		// 		geonameId: countries.geonames[229].geonameId
+		// 	})
+		// 	console.log('states', states)
+		// 	const regions = await geonames.children({
+		// 		geonameId: states.geonames[19].geonameId
+		// 	})
+		// 	console.log('regions', regions)
+		// 	const cities = await geonames.children({
+		// 		geonameId: regions.geonames[0].geonameId
+		// 	})
+		// 	console.log(cities)
+		// } catch (err) {
+		// 	console.error(err)
+		// }
 	}
+
+	// componentDidUpdate(prevProps, prevState) {
+	// 	console.log(prevState, prevProps)
+	// }
 
 	handleImageUpload = acceptedFiles => {
 		const { updateRegisterPhoto } = this.props
@@ -71,45 +113,134 @@ class Register extends PureComponent {
 				registerPhotos,
 				history,
 				rotations,
-				profile: { heightUnit, weightUnit }
+				profile: { heightUnit, weightUnit },
+				emailRegister
 			} = this.props
 			let fields = { ...this.state }
 			let err = false
-			if (!registerPhotos.length) {
-				toast.warning('Choose at least one image')
+			if (fields.with_email && !isValidEmail(fields.email)) {
+				toast.warning('Enter valid email')
 				err = true
 			}
-			if (!fields.region) {
+			if (fields.with_email && fields.email.length > 40) {
+				toast.warning('Email max length is 40 characters')
+				err = true
+			}
+			if (
+				!fields.with_email &&
+				(fields.nickname.length < 3 || fields.nickname.length > 20)
+			) {
+				toast.warning(
+					'Nickname min length is 3 characters, max length is 20 characters'
+				)
+				err = true
+			}
+			if (
+				fields.with_email &&
+				(fields.secret_word.length < 3 ||
+					fields.secret_word.length > 20)
+			) {
+				toast.warning(
+					'Secret word min length is 3 characters, max length is 20 characters'
+				)
+				err = true
+			}
+			if (fields.password.length < 6 || fields.password.length > 12) {
+				toast.warning(
+					'Password min length is 6 characters, max length is 12 characters'
+				)
+				err = true
+			}
+			if (fields.password !== fields.repeat_password) {
+				toast.warning('Passwords do not match')
+				err = true
+			}
+			if (fields.country.length === 0) {
+				toast.warning('Choose country')
+				err = true
+			}
+			if (fields.region.length === 0) {
 				toast.warning('Choose region')
 				err = true
 			}
+			if (fields.locality.length === 0) {
+				toast.warning('Choose locality')
+				err = true
+			}
+			if (fields.nationality.length === 0) {
+				toast.warning('Choose nationality')
+				err = true
+			}
+			if (fields.age.length === 0) {
+				toast.warning('Choose age')
+				err = true
+			}
+			if (fields.height < 10 || fields.height > 300) {
+				toast.warning('Min height value is 10, max - 300')
+				err = true
+			}
+			if (fields.chest < 10 || fields.chest > 300) {
+				toast.warning('Min chest value is 10, max - 300')
+				err = true
+			}
+			if (fields.waist < 10 || fields.waist > 300) {
+				toast.warning('Min waist value is 10, max - 300')
+				err = true
+			}
+			if (fields.thighs < 10 || fields.thighs > 300) {
+				toast.warning('Min thighs value is 10, max - 300')
+				err = true
+			}
+			if (fields.weight < 10 || fields.weight > 300) {
+				toast.warning('Min weight value is 10, max - 300')
+				err = true
+			}
+			if (registerPhotos.length === 0) {
+				toast.warning('Choose at least one image')
+				err = true
+			}
 			if (!err) {
-				const payload = new FormData()
+				const files = new FormData()
 				const l = registerPhotos.length
 				for (let i = 0; i < l; i++) {
-					payload.append('files', registerPhotos[i])
+					files.append('files', registerPhotos[i])
 				}
+				files.append('rotations', JSON.stringify(rotations))
 				fields.uniq = undefined
 				fields.registration = undefined
-				payload.append(
-					'data',
-					JSON.stringify({
-						...fields,
-						height_unit: heightUnit,
-						weight_unit: weightUnit
-					})
-				)
-				payload.append('rotations', JSON.stringify(rotations))
-				this.setState({ registration: true })
-				await register(payload)
-				history.push('/login')
-				if (this.state.with_email) {
-					toast.success(
-						'When the profile passes admin moderation, an alert will be sent to your email'
-					)
-				} else {
-					toast.success('Try to log in through time')
+				const data = {
+					...fields,
+					height_unit: heightUnit,
+					weight_unit: weightUnit
 				}
+				if (fields.with_email) {
+					fields.nickname = undefined
+					files.append('data', JSON.stringify(data))
+					this.setState({ registration: true })
+					await emailRegister(files)
+					history.push('/login')
+				} else {
+					fields.email = undefined
+					fields.allow_share_email = undefined
+					fields.secret_word = undefined
+					this.setState({ registration: true })
+					await register({ files, data })
+				}
+				// const files = new FormData()
+				// const l = registerPhotos.length
+				// for (let i = 0; i < l; i++) {
+				// 	files.append('files', registerPhotos[i])
+				// }
+				// fields.uniq = undefined
+				// fields.registration = undefined
+				// const data = {
+				// 	...fields,
+				// 	height_unit: heightUnit,
+				// 	weight_unit: weightUnit
+				// }
+				// files.append('rotations', JSON.stringify(rotations))
+				// this.setState({ registration: true })
+				// await register({ files, data })
 			}
 		} catch (err) {
 			this.setState({ registration: false })
@@ -121,6 +252,49 @@ class Register extends PureComponent {
 		const newRotation = rotations[0] + 90 >= 360 ? 0 : rotations[0] + 90
 		updateRotation({ index: 0, value: newRotation })
 	}
+
+	// selectCountry = async country => {
+	// 	const { countries } = this.state
+	// 	const countryObj = countries.find(c => c.value === country)
+	// 	let regions = []
+	// 	if (countryObj) {
+	// 		const geonameId = countryObj.id
+	// 		const states = await geonames.children({
+	// 			geonameId
+	// 		})
+	// 		console.log(states)
+	// 		regions = states.geonames.map(c => {
+	// 			return {
+	// 				label: c.adminName1,
+	// 				value: c.toponymName,
+	// 				id: c.geonameId
+	// 			}
+	// 		})
+	// 	}
+	// 	this.setState({ country, regions })
+	// }
+
+	// selectRegion = async region => {
+	// 	const { regions } = this.state
+	// 	const regionObj = regions.find(r => r.value === region)
+	// 	let cities = []
+	// 	if (regionObj) {
+	// 		console.log(regionObj, regions)
+	// 		const geonameId = regionObj.id
+	// 		const states = await geonames.children({
+	// 			geonameId
+	// 		})
+	// 		console.log(states)
+	// 		// cities = states.geonames.map(c => {
+	// 		// 	return {
+	// 		// 		label: c.adminName1,
+	// 		// 		value: c.regionCode,
+	// 		// 		id: c.geonameId
+	// 		// 	}
+	// 		// })
+	// 	}
+	// 	this.setState({ region, cities })
+	// }
 
 	render() {
 		const {
@@ -137,6 +311,8 @@ class Register extends PureComponent {
 			nationality,
 			locality,
 			imagesArray
+			// countries,
+			// regions
 		} = this.state
 		const { registerPhotos, rotations } = this.props
 		const addPhoto =
@@ -144,7 +320,7 @@ class Register extends PureComponent {
 			registerPhotos.length - 1 === imagesArray.length
 		const regionLabel = country === 'United States' ? 'state' : 'region'
 		return (
-			<div className="px-2 px-lg-5">
+			<div className="px-2 px-lg-5 container">
 				<div className="mt-5 registration">
 					<div className="px-0 px-md-4">
 						<h1 className="text-uppercase h2 text-center mb-4">
@@ -214,33 +390,35 @@ class Register extends PureComponent {
 									</label>
 								</div>
 
-								<div className="custom-checkbox ml-4 mt-4">
-									<label>
-										<input
-											onChange={() =>
-												this.setState(ps => ({
-													allow_share_email: !ps.allow_share_email
-												}))
-											}
-											value={allow_share_email}
-											type="checkbox"
-										/>
-										<span className="checkbox-icon checkbox-icon--rect" />
-										<span className="ml-2">
-											allow share my email
-										</span>
-									</label>
-								</div>
 								{with_email && (
-									<Input
-										classNames="mt-3"
-										changeHandler={value =>
-											this.setState({
-												secret_word: value
-											})
-										}
-										placeholder="secret word"
-									/>
+									<Fragment>
+										<div className="custom-checkbox ml-4 mt-4">
+											<label>
+												<input
+													onChange={() =>
+														this.setState(ps => ({
+															allow_share_email: !ps.allow_share_email
+														}))
+													}
+													value={allow_share_email}
+													type="checkbox"
+												/>
+												<span className="checkbox-icon checkbox-icon--rect" />
+												<span className="ml-2">
+													allow share my email
+												</span>
+											</label>
+										</div>
+										<Input
+											classNames="mt-3"
+											changeHandler={value =>
+												this.setState({
+													secret_word: value
+												})
+											}
+											placeholder="secret word"
+										/>
+									</Fragment>
 								)}
 								<Input
 									classNames="mt-3"
@@ -318,13 +496,36 @@ class Register extends PureComponent {
 						<div className="row">
 							<div className="col-lg-4 col-md-6 d-flex flex-column flex-md-row justify-content-between">
 								<div className="mr-4">
+									{/*<Select
+										className="left-asterisk"
+										onChange={country =>
+											this.selectCountry(country)
+										}
+										options={[
+											{ label: 'country', value: '' },
+											...countries
+										]}
+									/>
+									<Select
+										className="left-asterisk"
+										onChange={region =>
+											this.selectRegion(region)
+										}
+										options={[
+											{ label: regionLabel, value: '' },
+											...regions
+										]}
+										disabled={!country}
+									/>*/}
 									<div className="position-relative">
 										<div className="left-asterisk">
 											<CountryDropdown
 												value={country}
 												onChange={country =>
 													this.setState({
-														country
+														country,
+														region: '',
+														locality: ''
 													})
 												}
 												classes="country-region-select"
@@ -617,7 +818,7 @@ class Register extends PureComponent {
 							</div>
 						)}
 						<div className="row">
-							<div className="col-lg-3 col-md-4 col-6">
+							<div className="col-lg-4 col-md-4 col-6">
 								<Captcha />
 								<Input
 									classNames="ml-0 mb-3"
@@ -645,6 +846,7 @@ class Register extends PureComponent {
 								if already registered
 							</div>
 						</div>
+						{registration && <FullWindowLoader />}
 					</div>
 				</div>
 			</div>
@@ -669,6 +871,9 @@ const mapDispatchToProps = dispatch => ({
 	},
 	register: async payload => {
 		await dispatch(t_register(payload))
+	},
+	emailRegister: async payload => {
+		await dispatch(t_emailRegister(payload))
 	}
 })
 

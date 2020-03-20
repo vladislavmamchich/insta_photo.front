@@ -1,9 +1,9 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import {
-	CountryDropdown,
-	CountryRegionData
-} from 'react-country-region-selector'
+// import {
+// 	CountryDropdown,
+// 	CountryRegionData
+// } from 'react-country-region-selector'
 // import { NavLink } from 'react-router-dom'
 
 // import { toast } from 'react-toastify'
@@ -16,13 +16,22 @@ import { a_setFilter, a_clearFilter } from '../../redux/actions'
 import { ages } from '../../constants'
 
 import Select from '../../components/common/Select'
+import GeoSelect from '../../components/common/GeoSelect'
 import Loader from '../../components/service/Loader'
 
-const shortCodesFromNames = {}
-CountryRegionData.forEach(a => (shortCodesFromNames[a[0]] = a[1]))
+// const shortCodesFromNames = {}
+// CountryRegionData.forEach(a => (shortCodesFromNames[a[0]] = a[1]))
 
 const Filters = () => {
 	const dispatch = useDispatch()
+	const [selectedCountry, selectCountry] = useState({
+		label: 'all countries',
+		value: 'all'
+	})
+	const [selectedRegion, selectRegion] = useState({
+		label: 'all regions',
+		value: 'all'
+	})
 
 	const {
 		filter: {
@@ -36,13 +45,14 @@ const Filters = () => {
 			region,
 			locality
 		},
-		countries
+		countries,
+		nationalities
 	} = useSelector(store => store.users)
 
-	const getShortCodes = countries =>
-		countries.map(c => {
-			return shortCodesFromNames[c.value]
-		})
+	// const getShortCodes = countries =>
+	// 	countries.map(c => {
+	// 		return shortCodesFromNames[c.value]
+	// 	})
 	const { role } = useSelector(store => store.profile.data)
 	// const useDidUpdateEffect = (fn, inputs) => {
 	// 	const didMountRef = useRef(false)
@@ -52,10 +62,16 @@ const Filters = () => {
 	// 		else didMountRef.current = true
 	// 	}, inputs)
 	// }
+	useEffect(() => {
+		return () => {
+			dispatch(a_clearFilter())
+		}
+	}, [])
 	const regionLabel =
 		country === 'United States' ? 'all states' : 'all regions'
-	const cities =
-		country !== 'all' ? countries.find(c => c.value === country).cities : []
+	const regions =
+		selectedCountry.value !== 'all' ? selectedCountry.regions : []
+	const cities = selectedRegion.value !== 'all' ? selectedRegion.cities : []
 	return (
 		<div className="prod-options d-flex flex-column flex-md-row">
 			<div className="d-flex flex-column justify-content-start mr-5">
@@ -99,13 +115,17 @@ const Filters = () => {
 				<div className="d-flex flex-column mr-2">
 					<div className="d-flex align-items-baseline">
 						{countries ? (
-							<CountryDropdown
-								value={country}
+							<GeoSelect
 								onChange={country => {
+									selectCountry(country)
+									selectRegion({
+										label: 'all regions',
+										value: 'all'
+									})
 									dispatch(
 										a_setFilter({
 											field: 'country',
-											value: country || 'all'
+											value: country.value || 'all'
 										})
 									)
 									dispatch(
@@ -121,9 +141,14 @@ const Filters = () => {
 										})
 									)
 								}}
-								classes="country-region-select"
-								defaultOptionLabel="all countries"
-								whitelist={getShortCodes(countries)}
+								selected={country}
+								options={[
+									{
+										label: 'all countries',
+										value: 'all'
+									},
+									...countries
+								]}
 							/>
 						) : (
 							<div className="d-flex px-2">
@@ -134,33 +159,24 @@ const Filters = () => {
 					</div>
 					<div className="d-flex align-items-baseline">
 						{countries ? (
-							<Select
-								onChange={region =>
+							<GeoSelect
+								onChange={region => {
+									selectRegion(region)
 									dispatch(
 										a_setFilter({
 											field: 'region',
-											value: region || 'all'
+											value: region.value || 'all'
 										})
 									)
-								}
-								//width="90px"
+								}}
 								selected={region}
-								options={
-									country !== 'all'
-										? [
-												{
-													label: regionLabel,
-													value: 'all'
-												},
-												...cities
-										  ]
-										: [
-												{
-													label: regionLabel,
-													value: 'all'
-												}
-										  ]
-								}
+								options={[
+									{
+										label: regionLabel,
+										value: 'all'
+									},
+									...regions
+								]}
 								isDisabled={country === 'all'}
 							/>
 						) : (
@@ -172,35 +188,24 @@ const Filters = () => {
 					</div>
 					<div className="d-flex align-items-baseline">
 						{countries ? (
-							<Select
+							<GeoSelect
 								onChange={locality =>
 									dispatch(
 										a_setFilter({
 											field: 'locality',
-											value: locality || 'all'
+											value: locality.value || 'all'
 										})
 									)
 								}
 								selected={locality}
-								options={
-									country !== 'all'
-										? [
-												{
-													label: 'all localities',
-													value: 'all'
-												},
-												...countries.find(
-													c => c.value === country
-												).cities
-										  ]
-										: [
-												{
-													label: 'all localities',
-													value: 'all'
-												}
-										  ]
-								}
-								isDisabled={country === 'all'}
+								options={[
+									{
+										label: 'all localities',
+										value: 'all'
+									},
+									...cities
+								]}
+								isDisabled={region === 'all'}
 							/>
 						) : (
 							<div className="d-flex px-2">
@@ -212,20 +217,24 @@ const Filters = () => {
 				</div>
 				<div>
 					<div className="d-flex align-items-baseline">
-						{countries ? (
-							<CountryDropdown
-								value={nationality}
-								onChange={nationality =>
+						{nationalities ? (
+							<GeoSelect
+								onChange={nationality => {
 									dispatch(
 										a_setFilter({
 											field: 'nationality',
-											value: nationality || 'all'
+											value: nationality.value || 'all'
 										})
 									)
-								}
-								classes="country-region-select"
-								defaultOptionLabel="all nationalities"
-								whitelist={getShortCodes(countries)}
+								}}
+								selected={nationality}
+								options={[
+									{
+										label: 'all nationalities',
+										value: 'all'
+									},
+									...nationalities
+								]}
 							/>
 						) : (
 							<div className="d-flex px-2">

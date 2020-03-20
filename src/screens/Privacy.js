@@ -6,11 +6,11 @@ import { connect } from 'react-redux'
 
 // import { t_login } from '../../redux/tracks'
 
-class Terms extends PureComponent {
+class Privacy extends PureComponent {
 	render() {
 		return (
 			<div className="d-flex align-items-center justify-content-center">
-				<h1>Terms of Use</h1>
+				<h1>Privacy Policy page</h1>
 			</div>
 		)
 	}
@@ -21,4 +21,4 @@ const mapStateToProps = state => ({
 })
 const mapDispatchToProps = dispatch => ({})
 
-export default connect(mapStateToProps, mapDispatchToProps)(Terms)
+export default connect(mapStateToProps, mapDispatchToProps)(Privacy)

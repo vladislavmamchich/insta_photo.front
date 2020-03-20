@@ -6,7 +6,6 @@ import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.min.css'
 import LanguageDetector from 'i18next-browser-languagedetector'
 
-import { languages } from './constants'
 import { a_setLanguage } from './redux/actions'
 
 import Personal from './routes/Personal'
@@ -25,6 +24,7 @@ import Login from './screens/Login'
 import Register from './screens/Register'
 import ResetPassword from './screens/ResetPassword'
 import Terms from './screens/Terms'
+import Privacy from './screens/Privacy'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 // import 'bootstrap/dist/css/bootstrap-theme.min.css'
@@ -37,17 +37,13 @@ const NotFound = lazy(() => import('./components/service/NotFound'))
 
 class App extends PureComponent {
     componentDidMount() {
-        const { language, setLanguage } = this.props
-        // const lng = language ? language.value.toLowerCase() : languages[0].value
         i18next.use(LanguageDetector).init({
             fallbackLng: 'en',
-            // lng,
             resources: {
                 en: { translation: require('./languages/en.json') },
                 ru: { translation: require('./languages/ru.json') }
             }
         })
-        // setLanguage(lng)
     }
 
     render() {
@@ -61,7 +57,7 @@ class App extends PureComponent {
                     <ServerError />
                 ) : (
                     <Router basename={process.env.REACT_APP_BASENAME}>
-                        <div className="container-fluid h-100 d-flex flex-column justify-content-between">
+                        <div className="container-fluid h-100 d-flex flex-column justify-content-between min-vh-100">
                             {modal && (
                                 <Modal>
                                     {modal.children || <ModalWindow />}
@@ -93,6 +89,10 @@ class App extends PureComponent {
                                                 path="/terms"
                                                 component={Terms}
                                             />
+                                            <Route
+                                                path="/privacy"
+                                                component={Privacy}
+                                            />
                                             <Route component={NotFound} />
                                         </Switch>
                                     </Fragment>
@@ -100,7 +100,6 @@ class App extends PureComponent {
                                     <Personal />
                                 )}
                             </Suspense>
-
                             {!isAdmin && <Footer />}
                         </div>
                     </Router>

@@ -4,7 +4,7 @@ import { connect } from 'react-redux'
 import { toast } from 'react-toastify'
 import i18next from 'i18next'
 
-import { t_login } from '../redux/tracks'
+import { t_login, t_emailRegisterConfirm } from '../redux/tracks'
 
 import Button from '../components/common/Button'
 import Input from '../components/common/Input'
@@ -27,10 +27,17 @@ class Login extends PureComponent {
 			if (email && password && captcha) {
 				this.setState({ submitting: true })
 				try {
+					if (remember_me) {
+						localStorage.setItem(
+							'login_data',
+							JSON.stringify({ email, password })
+						)
+					} else {
+						localStorage.removeItem('login_data')
+					}
 					await login({
 						email,
 						password,
-						remember_me,
 						captcha
 					})
 					history.push('/profile')
@@ -43,8 +50,38 @@ class Login extends PureComponent {
 		}
 	}
 
+	async componentDidMount() {
+		const loginData = localStorage.getItem('login_data')
+		if (loginData) {
+			const { email, password } = JSON.parse(loginData)
+			this.setState({ email, password })
+		}
+		const {
+			location: { search },
+			emailRegisterConfirm,
+			history
+		} = this.props
+		if (search) {
+			console.log(search)
+			const searchParams = new URLSearchParams(search.slice(1))
+			if (searchParams.has('emailRegisterToken')) {
+				const emailRegisterToken = searchParams.get(
+					'emailRegisterToken'
+				)
+				await emailRegisterConfirm({ emailRegisterToken })
+				history.push('/login')
+			}
+		}
+	}
+
 	render() {
-		const { show_pass, remember_me, submitting } = this.state
+		const {
+			show_pass,
+			remember_me,
+			submitting,
+			email,
+			password
+		} = this.state
 		return (
 			<div className="d-flex flex-column m-auto justify-content-center">
 				<div className="text-uppercase mb-3 text-center">log in</div>
@@ -52,6 +89,8 @@ class Login extends PureComponent {
 					classNames="ml-0"
 					changeHandler={email => this.setState({ email })}
 					placeholder="nickname / email"
+					value={email}
+					type="email"
 				/>
 				<Input
 					classNames="ml-0 my-3"
@@ -59,6 +98,7 @@ class Login extends PureComponent {
 					type={show_pass ? 'text' : 'password'}
 					placeholder="password"
 					autoComplete="new-password"
+					value={password}
 				/>
 				<div className="custom-checkbox">
 					<label tabIndex={3}>
@@ -114,6 +154,9 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
 	login: async payload => {
 		await dispatch(t_login(payload))
+	},
+	emailRegisterConfirm: async payload => {
+		await dispatch(t_emailRegisterConfirm(payload))
 	}
 })
 

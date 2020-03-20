@@ -4,8 +4,6 @@ import styled from 'styled-components'
 
 // import { toast } from 'react-toastify'
 // import i18next from 'i18next'
-
-import { a_setIsAdmin } from '../../redux/actions'
 import { t_loadUserInfo, t_userModeration } from '../../redux/tracks'
 
 import Button from '../../components/common/Button'
@@ -13,23 +11,22 @@ import UserPhoto from './UserPhoto'
 
 const AdminUserInfo = props => {
 	const {
-		match: { params }
+		match: { params },
+		history
 	} = props
 
 	const dispatch = useDispatch()
-	const isAdmin = useSelector(store => store.service.isAdmin)
 	const user = useSelector(store => store.users.user)
 
 	const [loading, setLoading] = useState(false)
 
-	useEffect(() => {
-		dispatch(a_setIsAdmin(true))
-		document.getElementById('root').style.backgroundColor = '#eee'
-	}, [dispatch, isAdmin])
+	const loadUserInfo = async () => {
+		await dispatch(t_loadUserInfo({ user_id: params.id }))
+	}
 
 	useEffect(() => {
-		dispatch(t_loadUserInfo({ user_id: params.id }))
-	}, [dispatch, params.id])
+		loadUserInfo().catch(err => history.push('/admin'))
+	}, [history])
 
 	const userModeration = async ({ user_id, moderated }) => {
 		setLoading(true)

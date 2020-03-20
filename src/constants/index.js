@@ -1,3 +1,6 @@
+import Geonames from 'geonames.js'
+import { store } from '../redux/store'
+
 export const languages = [
 	{ label: 'english', value: 'en' },
 	{ label: 'русский', value: 'ru' }
@@ -23,4 +26,12 @@ export const colors = {
 	grey: '#d8d8d8',
 	blue: '#007fff',
 	golden: '#f8b94d'
+}
+
+export const getGeonames = () => {
+	return new Geonames({
+		username: 'myusername',
+		lan: store.getState().profile.language,
+		encoding: 'JSON'
+	})
 }

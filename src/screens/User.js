@@ -30,7 +30,10 @@ const User = props => {
 		} else {
 			history.push('/')
 		}
-	}, [])
+		return () => {
+			dispatch(a_setUserInfo(null))
+		}
+	}, [user_id, dispatch, history, match])
 	const { user } = useSelector(store => store.users)
 	const { heightUnit, weightUnit, data } = useSelector(store => store.profile)
 
@@ -46,22 +49,23 @@ const User = props => {
 		dispatch(a_setUserInfo({ ...user, images: user.images }))
 	}
 	const favourite = async () => {
-		if (user.images[index].favourites.includes(data._id)) {
+		if (data.favourites.includes(user.images[index]._id)) {
+			// if (user.images[index].favourites.includes(data._id)) {
 			dispatch(
 				t_removeFromFavourites({
 					image: user.images[index]
 				})
 			)
-			user.images[index].favourites = user.images[
-				index
-			].favourites.filter(i => i !== data._id)
+			// user.images[index].favourites = user.images[
+			// 	index
+			// ].favourites.filter(i => i !== data._id)
 		} else {
 			dispatch(
 				t_addToFavourites({
 					image: user.images[index]
 				})
 			)
-			user.images[index].favourites.push(data._id)
+			// user.images[index].favourites.push(data._id)
 			if (!user.images[index].likes.includes(data._id)) {
 				user.images[index].likes.push(data._id)
 				socket.emit('like', { image_id: user.images[index]._id })
@@ -89,7 +93,8 @@ const User = props => {
 			weight_unit
 		} = user
 		const is_me = _id === data._id
-		const in_favourites = images[index].favourites.includes(data._id)
+		// const in_favourites = images[index].favourites.includes(data._id)
+		const in_favourites = data.favourites.includes(images[index]._id)
 		const regionLabel = country === 'United States' ? 'State' : 'Region'
 		const image_id = location
 			? new URLSearchParams(location.search).get('image_id')
@@ -122,7 +127,7 @@ const User = props => {
 								} fa-heart`}
 							/>
 							<span className="text">
-								{images[index].likes.length}
+								+{images[index].likes.length}
 							</span>
 						</div>
 						{!is_me && (

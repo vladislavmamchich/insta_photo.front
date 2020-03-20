@@ -49,20 +49,80 @@ export const t_login = payload => dispatch => {
 		})
 	})
 }
-export const t_register = payload => (dispatch, getState) => {
+const t_uploadImages = ({ files, data }) => dispatch => {
+	return new Promise((resolve, reject) => {
+		sendRequest({
+			r_path: paths.p_uploadImages,
+			method: 'post',
+			attr: files,
+			success: res => {
+				dispatch(acts.a_updateRotation({ reset: true }))
+				dispatch(acts.a_updateRegisterPhoto({ reset: true }))
+				const { nickname, password } = data
+				dispatch(
+					acts.a_setModal({
+						title: res.msg,
+						message: `Your nickname: ${nickname}, your password: ${password}.
+						Try to log in through time`,
+						outClickForbidden: true,
+						onClick: () => window.location.assign('/login')
+					})
+				)
+				localStorage.removeItem('auth')
+				resolve()
+			},
+			failFunc: err => {
+				toast.warn(err)
+				localStorage.removeItem('auth')
+				reject()
+			}
+		})
+	})
+}
+export const t_register = ({ files, data }) => (dispatch, getState) => {
 	return new Promise((resolve, reject) => {
 		sendRequest({
 			r_path: paths.p_register,
 			method: 'post',
-			attr: payload,
-			success: res => {
-				toast.success(res.msg)
-				dispatch(acts.a_updateRotation({ reset: true }))
-				dispatch(acts.a_updateRegisterPhoto({ reset: true }))
-				resolve()
+			attr: { data },
+			success: async ({ access_token }) => {
+				localStorage.setItem('auth', access_token)
+				try {
+					await dispatch(t_uploadImages({ files, data }))
+					resolve()
+				} catch (err) {
+					reject()
+				}
+
+				// toast.success(res.msg)
+				// dispatch(acts.a_updateRotation({ reset: true }))
+				// dispatch(acts.a_updateRegisterPhoto({ reset: true }))
+				// const { with_email, email, nickname, password } = JSON.parse(
+				// 	payload.get('data')
+				// )
+				// dispatch(
+				// 	acts.a_setModal({
+				// 		title: res.msg,
+				// 		message: `Your email/nickname: ${
+				// 			with_email ? email : nickname
+				// 		}, your password: ${password}.
+				// 		${
+				// 			with_email
+				// 				? 'When the profile passes admin moderation, an alert will be sent to your email'
+				// 				: 'Try to log in through time'
+				// 		}`,
+				// 		outClickForbidden: true,
+				// 		onClick: () => window.location.assign('/login')
+				// 	})
+				// )
 			},
 			failFunc: err => {
-				toast.warn(err.msg)
+				if (err.msg) {
+					toast.warn(err.msg)
+				} else {
+					toast.warn(JSON.stringify(err))
+				}
+
 				reject()
 			}
 		})
@@ -112,7 +172,7 @@ export const t_loadProfile = () => dispatch => {
 	})
 }
 export const t_loadUserInfo = payload => dispatch => {
-	return new Promise(resolve => {
+	return new Promise((resolve, reject) => {
 		sendRequest({
 			r_path: paths.p_getUser,
 			method: 'post',
@@ -120,12 +180,13 @@ export const t_loadUserInfo = payload => dispatch => {
 			success: res => {
 				dispatch(acts.a_setUserInfo(res.user))
 				resolve()
-			}
+			},
+			failFunc: err => reject(err)
 		})
 	})
 }
 export const t_loadUsers = payload => dispatch => {
-	return new Promise(resolve => {
+	return new Promise((resolve, reject) => {
 		sendRequest({
 			r_path: paths.p_getUsers,
 			method: 'post',
@@ -133,7 +194,8 @@ export const t_loadUsers = payload => dispatch => {
 			success: res => {
 				dispatch(acts.a_setUsers(res))
 				resolve()
-			}
+			},
+			failFunc: err => reject(err)
 		})
 	})
 }
@@ -205,7 +267,10 @@ export const t_rotateImage = payload => dispatch => {
 		})
 	})
 }
-export const t_changeMainPhotoAdmin = payload => (dispatch, getState) => {
+export const t_changeMainPhotoAdmin = ({ payload, image }) => (
+	dispatch,
+	getState
+) => {
 	return new Promise((resolve, reject) => {
 		sendRequest({
 			r_path: paths.p_changeMainPhotoAdmin,
@@ -215,7 +280,7 @@ export const t_changeMainPhotoAdmin = payload => (dispatch, getState) => {
 				dispatch(
 					acts.a_setUserInfo({
 						...getState().users.user,
-						main_photo: payload.main_photo
+						main_photo: image
 					})
 				)
 				toast.success(res.msg)
@@ -252,8 +317,8 @@ export const t_images = payload => (dispatch, getState) => {
 			r_path: paths.p_images,
 			method: 'post',
 			attr: payload,
-			success: ({ images }) => {
-				// console.log(res.docs.map(i => i.created_at))
+			success: ({ images, totalLikes }) => {
+				dispatch(acts.a_setTotalLikes(totalLikes))
 				dispatch(acts.a_pushUsersMainImages({ images }))
 				resolve()
 			}
@@ -308,34 +373,17 @@ export const t_addToFavourites = ({ image }) => (dispatch, getState) => {
 			r_path: paths.p_favourites,
 			method: 'post',
 			attr: { image_id: image._id },
-			success: ({ new_favourites }) => {
+			success: res => {
 				const {
 					profile: { data }
-					// users: {
-					// 	images,
-					// 	filter: { showMe }
-					// }
 				} = getState()
-				// console.log('index', index)
-				// const myFavouritesIndex = data.favourites.findIndex(
-				// 	i => i._id === image._id
-				// )
-				// index = showMe ? index - 1 : index
-				// const imagesFavouritesIndex = images.docs[
-				// 	index
-				// ].favourites.indexOf(data._id)
-				// const isMyFavourites =
-				// 	myFavouritesIndex >= 0 && imagesFavouritesIndex >= 0
 				if (!image.likes.includes(data._id)) {
 					socket.emit('like', { image_id: image._id })
 				}
 				dispatch(
 					acts.a_addToFavourites({
 						image_id: image._id,
-						// new_favourites,
-						// myFavouritesIndex,
 						data
-						// imagesFavouritesIndex
 					})
 				)
 				resolve()
@@ -349,34 +397,14 @@ export const t_removeFromFavourites = ({ image }) => (dispatch, getState) => {
 			r_path: paths.p_favourites,
 			method: 'post',
 			attr: { image_id: image._id },
-			success: ({ new_favourites }) => {
+			success: res => {
 				const {
 					profile: { data }
-					// users: {
-					// 	images,
-					// 	filter: { showMe }
-					// }
 				} = getState()
-				// console.log('index', index)
-				// const myFavouritesIndex = data.favourites.findIndex(
-				// 	i => i._id === image._id
-				// )
-				// index = showMe ? index - 1 : index
-				// const imagesFavouritesIndex = images.docs[
-				// 	index
-				// ].favourites.indexOf(data._id)
-				// const isMyFavourites =
-				// 	myFavouritesIndex >= 0 && imagesFavouritesIndex >= 0
-				// if (!isMyFavourites && !image.likes.includes(data._id)) {
-				// 	socket.emit('like', { image_id: image._id })
-				// }
 				dispatch(
 					acts.a_removeFromFavourites({
 						image_id: image._id,
-						// new_favourites,
-						// myFavouritesIndex,
 						data
-						// imagesFavouritesIndex
 					})
 				)
 				resolve()
@@ -384,7 +412,7 @@ export const t_removeFromFavourites = ({ image }) => (dispatch, getState) => {
 		})
 	})
 }
-export const t_changePassword = payload => dispatch => {
+export const t_changePassword = payload => (dispatch, getState) => {
 	return new Promise((resolve, reject) => {
 		sendRequest({
 			r_path: paths.p_password,
@@ -392,6 +420,12 @@ export const t_changePassword = payload => dispatch => {
 			attr: payload,
 			success: res => {
 				toast.success(res.msg)
+				const {
+					profile: { data }
+				} = getState()
+				dispatch(
+					acts.a_setProfile({ ...data, one_time_password: undefined })
+				)
 				resolve()
 			},
 			failFunc: err => {
@@ -441,14 +475,14 @@ export const t_nickname = payload => dispatch => {
 	})
 }
 export const t_email = payload => dispatch => {
-	return new Promise(resolve => {
+	return new Promise((resolve, reject) => {
 		sendRequest({
 			r_path: paths.p_email,
-			method: 'patch',
+			method: 'post',
 			attr: payload,
-			success: ({ msg, profile }) => {
+			success: ({ msg }) => {
 				toast.success(msg)
-				dispatch(acts.a_setProfile(profile))
+				// dispatch(acts.a_setProfile(profile))
 				resolve()
 			},
 			failFunc: err => {
@@ -457,10 +491,51 @@ export const t_email = payload => dispatch => {
 				} else {
 					toast.warn(JSON.stringify(err))
 				}
+				reject()
 			}
 		})
 	})
 }
+export const t_updateEmail = ({ emailToken, cb }) => dispatch => {
+	// return new Promise(resolve => {
+	sendRequest({
+		r_path: paths.p_updateEmail,
+		method: 'patch',
+		attr: { emailToken },
+		success: ({ msg, profile }) => {
+			toast.success(msg)
+			dispatch(acts.a_setProfile(profile))
+			cb(profile.email)
+		},
+		failFunc: err => {
+			if (err.msg) {
+				toast.warn(err.msg)
+			} else {
+				toast.warn(JSON.stringify(err))
+			}
+		}
+	})
+	// })
+}
+// export const t_confirmEmail = payload => dispatch => {
+// 	return new Promise(resolve => {
+// 		sendRequest({
+// 			r_path: paths.p_confirmEmail,
+// 			method: 'post',
+// 			attr: payload,
+// 			success: ({ msg }) => {
+// 				toast.success(msg)
+// 			},
+// 			failFunc: err => {
+// 				if (err.msg) {
+// 					toast.warn(err.msg)
+// 				} else {
+// 					toast.warn(JSON.stringify(err))
+// 				}
+// 			}
+// 		})
+// 	})
+// }
 export const t_allowShareEmail = payload => dispatch => {
 	return new Promise(resolve => {
 		sendRequest({
@@ -503,19 +578,19 @@ export const t_changeSecretWord = payload => dispatch => {
 		})
 	})
 }
-export const t_getCountries = payload => dispatch => {
+export const t_getGeo = payload => dispatch => {
 	return new Promise(resolve => {
 		sendRequest({
-			r_path: paths.p_getCountries,
-			success: ({ countries }) => {
-				dispatch(acts.a_setCountries(countries))
+			r_path: paths.p_getGeo,
+			success: ({ countries, nationalities }) => {
+				dispatch(acts.a_setGeo({ countries, nationalities }))
 				resolve()
 			}
 		})
 	})
 }
 export const t_registerParticipant = payload => dispatch => {
-	return new Promise(resolve => {
+	return new Promise((resolve, reject) => {
 		sendRequest({
 			r_path: paths.p_registerParticipant,
 			method: 'post',
@@ -530,6 +605,59 @@ export const t_registerParticipant = payload => dispatch => {
 				} else {
 					toast.warn(JSON.stringify(err))
 				}
+				reject()
+			}
+		})
+	})
+}
+export const t_emailRegister = payload => dispatch => {
+	return new Promise((resolve, reject) => {
+		sendRequest({
+			r_path: paths.p_emailRegister,
+			method: 'post',
+			attr: payload,
+			success: ({ msg }) => {
+				toast.success(msg)
+				dispatch(acts.a_updateRotation({ reset: true }))
+				dispatch(acts.a_updateRegisterPhoto({ reset: true }))
+				resolve()
+			},
+			failFunc: err => {
+				if (err.msg) {
+					toast.warn(err.msg)
+				} else {
+					toast.warn(JSON.stringify(err))
+				}
+				reject()
+			}
+		})
+	})
+}
+export const t_emailRegisterConfirm = payload => dispatch => {
+	return new Promise((resolve, reject) => {
+		sendRequest({
+			r_path: paths.p_emailRegisterConfirm,
+			method: 'post',
+			attr: payload,
+			success: async ({ msg, email, password }) => {
+				dispatch(
+					acts.a_setModal({
+						title: msg,
+						message: `Your email: ${email}, your password: ${password}.
+						When the profile passes admin moderation, an alert will be sent to your email`,
+						outClickForbidden: true,
+						onClick: () => window.location.assign('/login')
+					})
+				)
+				resolve()
+			},
+			failFunc: err => {
+				if (err.msg) {
+					toast.warn(err.msg)
+				} else {
+					toast.warn(JSON.stringify(err))
+				}
+				reject()
 			}
 		})
 	})

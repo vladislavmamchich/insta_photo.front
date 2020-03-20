@@ -14,6 +14,7 @@ import Button from '../common/Button'
 import Select from '../common/Select'
 import ImageUpload from '../common/ImageUpload'
 import AddPhoto from '../AddPhoto'
+import FullWindowLoader from '../service/FullWindowLoader'
 
 class Register extends PureComponent {
 	state = {
@@ -47,12 +48,48 @@ class Register extends PureComponent {
 			} = this.props
 			let fields = { ...this.state }
 			let err = false
-			if (!registerPhotos.length) {
-				toast.warning('Choose at least one image')
+			if (fields.country.length === 0) {
+				toast.warning('Choose country')
 				err = true
 			}
-			if (!fields.region) {
+			if (fields.region.length === 0) {
 				toast.warning('Choose region')
+				err = true
+			}
+			if (fields.locality.length === 0) {
+				toast.warning('Choose locality')
+				err = true
+			}
+			if (fields.nationality.length === 0) {
+				toast.warning('Choose nationality')
+				err = true
+			}
+			if (fields.age.length === 0) {
+				toast.warning('Choose age')
+				err = true
+			}
+			if (fields.height < 10 || fields.height > 300) {
+				toast.warning('Min height value is 10, max - 300')
+				err = true
+			}
+			if (fields.chest < 10 || fields.chest > 300) {
+				toast.warning('Min chest value is 10, max - 300')
+				err = true
+			}
+			if (fields.waist < 10 || fields.waist > 300) {
+				toast.warning('Min waist value is 10, max - 300')
+				err = true
+			}
+			if (fields.thighs < 10 || fields.thighs > 300) {
+				toast.warning('Min thighs value is 10, max - 300')
+				err = true
+			}
+			if (fields.weight < 10 || fields.weight > 300) {
+				toast.warning('Min weight value is 10, max - 300')
+				err = true
+			}
+			if (registerPhotos.length === 0) {
+				toast.warning('Choose at least one image')
 				err = true
 			}
 			if (!err) {
@@ -111,7 +148,9 @@ class Register extends PureComponent {
 										value={country}
 										onChange={country =>
 											this.setState({
-												country
+												country,
+												region: '',
+												locality: ''
 											})
 										}
 										classes="country-region-select"
@@ -401,6 +440,7 @@ class Register extends PureComponent {
 						onClick={() => this.register()}
 					/>
 				</div>
+				{registration && <FullWindowLoader />}
 			</div>
 		)
 	}
@@ -409,6 +449,7 @@ class Register extends PureComponent {
 const mapStateToProps = state => ({
 	registerPhotos: state.service.registerPhotos,
 	rotations: state.service.rotations,
+	modal: state.service.modal,
 	profile: state.profile
 })
 const mapDispatchToProps = dispatch => ({

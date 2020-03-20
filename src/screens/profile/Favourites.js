@@ -69,8 +69,8 @@ const mapStateToProps = state => ({
 	language: state.profile.language
 })
 const mapDispatchToProps = dispatch => ({
-	loadFavourites: () => {
-		dispatch(t_favouritesFromPage())
+	loadFavourites: async payload => {
+		await dispatch(t_favouritesFromPage(payload))
 	}
 })
 
