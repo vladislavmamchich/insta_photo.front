@@ -36,10 +36,12 @@ export default function serviceReducer(
 						[payload.index]: { $set: payload.value }
 				  })
 			return { ...state, registerPhotos: newRegisterPhotos }
-		case 'DELETE_LAST_REGISTER_PHOTO':
+		case 'DELETE_REGISTER_PHOTO':
+			let registerPhotos = [...state.registerPhotos]
+			registerPhotos.splice(payload, 1)
 			return {
 				...state,
-				registerPhotos: [...state.registerPhotos.slice(0, -1)]
+				registerPhotos
 			}
 		case 'UPDATE_ROTATION':
 			const newRotations = payload.reset

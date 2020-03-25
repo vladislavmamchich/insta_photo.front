@@ -379,7 +379,8 @@ hr {
   -webkit-text-fill-color: #f8b94d;
 }
 .product .likes,
-.product-overview .center-item .likes {
+.product-overview .center-item .likes,
+.user-images .image .likes {
   width: 45px;
   height: 45px;
   padding: 4px;
@@ -403,20 +404,24 @@ hr {
   margin-left: -2px;
 }
 .product .likes .text,
-.product-overview .center-item .likes .text {
+.product-overview .center-item .likes .text,
+.user-images .image .likes .text {
   -webkit-transition: 0.2s;
   transition: 0.2s;
   color: var(--black);
 }
 .product .likes .fa,
-.product-overview .center-item .likes .fa {
+.product-overview .center-item .likes .fa,
+.user-images .image .likes .fa {
   -webkit-text-stroke: 3px var(--coral);
   -webkit-text-fill-color: #dc3545;
 }
 .product .likes .fa,
 .product-overview .center-item .likes .fa,
 .product .likes .far,
-.product-overview .center-item .likes .far {
+.product-overview .center-item .likes .far,
+.user-images .image .likes .fa,
+.user-images .image .likes .far {
   -webkit-transition: 0.2s;
   transition: 0.2s;
   font-size: 20px;
@@ -611,7 +616,7 @@ hr {
   margin: 10px 0;
   /*max-width: 400px;*/
   height: 350px;
-  border: 2px solid var(--grey);
+  border: 2px solid var(--white);
 }
 .user-images .image img {
   /*max-height: 400px;*/
@@ -628,6 +633,7 @@ hr {
   display: block;
   margin: auto;
 }
+/*
 .user-images .image .likes {
   height: 60px;
   padding: 2px;
@@ -646,8 +652,6 @@ hr {
   background: var(--white);
   color: var(--coral);
   position: absolute;
-  /*left: 2px;*/
-  /*top: 2px;*/
   z-index: 10;
 }
 .user-images .image .likes .text {
@@ -663,7 +667,7 @@ hr {
   -webkit-transition: 0.2s;
   transition: 0.2s;
   font-size: 30px;
-}
+}*/
 /*.user-images .image img {
   border: 2px solid #8e8e8e;
 }*/

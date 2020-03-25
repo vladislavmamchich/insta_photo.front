@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react'
 import Dropzone from 'react-dropzone'
 import { toast } from 'react-toastify'
+import i18next from 'i18next'
 
 class ImageUpload extends PureComponent {
 	// _render = (getRootProps, getInputProps) => {
@@ -27,7 +28,7 @@ class ImageUpload extends PureComponent {
 				multiple={false}
 				onDrop={onDrop}
 				onDropRejected={() =>
-					toast.error('Неверный формат или размер файла')
+					toast.error(i18next.t('Invalid file format or size'))
 				}
 				disableClick={false}
 			>

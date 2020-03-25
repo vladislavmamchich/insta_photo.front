@@ -4,7 +4,7 @@ import InfiniteScroll from 'react-infinite-scroll-component'
 // import { NavLink } from 'react-router-dom'
 
 // import { toast } from 'react-toastify'
-// import i18next from 'i18next'
+import i18next from 'i18next'
 
 import { t_favouritesFromPage } from '../../redux/tracks'
 
@@ -36,25 +36,29 @@ class Favourites extends PureComponent {
 					{favourites.docs.length ? (
 						<Fragment>
 							<InfiniteScroll
-								dataLength={favourites.limit}
+								dataLength={favourites.docs.length}
 								next={() =>
 									this.fetchImages(favourites.nextPage)
 								}
 								hasMore={favourites.hasNextPage}
 								className="favourites"
 							>
-								{favourites.docs.map((i, index) => (
-									<FavouriteImage key={index} image={i} />
-								))}
+								{favourites.docs.map((i, index) =>
+									i.original ? (
+										<FavouriteImage key={index} image={i} />
+									) : null
+								)}
 							</InfiniteScroll>
 							{loading && (
 								<div className="d-flex justify-content-center align-items-center mt-4">
-									<h4>Loading...</h4>
+									<h4>{i18next.t('Loading')}...</h4>
 								</div>
 							)}
 						</Fragment>
 					) : (
-						<div style={{ height: '50vh' }}>No favourites</div>
+						<div style={{ height: '50vh' }}>
+							{i18next.t('No favourites')}
+						</div>
 					)}
 				</div>
 			)

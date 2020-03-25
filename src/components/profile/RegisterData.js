@@ -2,12 +2,11 @@ import React, { PureComponent } from 'react'
 import { connect } from 'react-redux'
 // import { Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import { CountryDropdown, RegionDropdown } from 'react-country-region-selector'
-// import i18next from 'i18next'
+import i18next from 'i18next'
 
 import { a_updateRegisterPhoto, a_updateRotation } from '../../redux/actions'
 import { t_registerParticipant } from '../../redux/tracks'
-import { forbiddenKeyCodes } from '../../constants'
+import { forbiddenKeyCodes, getGeonames, ages } from '../../constants'
 
 import Input from '../common/Input'
 import Button from '../common/Button'
@@ -16,11 +15,12 @@ import ImageUpload from '../common/ImageUpload'
 import AddPhoto from '../AddPhoto'
 import FullWindowLoader from '../service/FullWindowLoader'
 
+const geonames = getGeonames()
+
 class Register extends PureComponent {
 	state = {
 		country: '',
 		region: '',
-		locality: '',
 		height: '',
 		weight: '',
 		chest: '',
@@ -30,7 +30,9 @@ class Register extends PureComponent {
 		nationality: '',
 		age: '',
 		registration: false,
-		imagesArray: []
+		imagesArray: [],
+		countries: [],
+		regions: []
 	}
 
 	handleImageUpload = acceptedFiles => {
@@ -48,23 +50,19 @@ class Register extends PureComponent {
 			} = this.props
 			let fields = { ...this.state }
 			let err = false
-			if (fields.country.length === 0) {
+			if (!fields.country) {
 				toast.warning('Choose country')
 				err = true
 			}
-			if (fields.region.length === 0) {
+			if (!fields.region) {
 				toast.warning('Choose region')
 				err = true
 			}
-			if (fields.locality.length === 0) {
-				toast.warning('Choose locality')
-				err = true
-			}
-			if (fields.nationality.length === 0) {
+			if (!fields.nationality) {
 				toast.warning('Choose nationality')
 				err = true
 			}
-			if (fields.age.length === 0) {
+			if (!fields.age) {
 				toast.warning('Choose age')
 				err = true
 			}
@@ -122,96 +120,104 @@ class Register extends PureComponent {
 		updateRotation({ index: 0, value: newRotation })
 	}
 
+	async componentDidMount() {
+		try {
+			let countries = await geonames.countryInfo({})
+			countries = countries.geonames.map(c => {
+				return {
+					label: c.countryName,
+					value: c.geonameId
+				}
+			})
+			this.setState({ countries })
+		} catch (err) {
+			console.error(err)
+		}
+	}
+
+	selectCountry = async geonameId => {
+		const states = await geonames.children({
+			geonameId
+		})
+		const regions = states.geonames.map(c => {
+			return {
+				label: c.name,
+				value: c.geonameId
+			}
+		})
+		this.setState({ country: geonameId, regions })
+	}
+
 	render() {
 		const {
 			operations,
 			country,
-			region,
 			registration,
-			nationality,
-			locality,
-			imagesArray
+			imagesArray,
+			countries,
+			regions
 		} = this.state
 		const { registerPhotos, rotations } = this.props
 		const addPhoto =
 			registerPhotos.length < 5 &&
 			registerPhotos.length - 1 === imagesArray.length
-		const regionLabel = country === 'United States' ? 'state' : 'region'
+		const regionLabel =
+			country === 6252001 ? i18next.t('state') : i18next.t('region')
 		return (
 			<div className="px-0 px-md-4">
 				<div className="row">
 					<div className="col-lg-4 col-md-6 d-flex flex-column flex-md-row justify-content-between">
 						<div className="mr-4">
-							<div className="position-relative">
-								<div className="left-asterisk">
-									<CountryDropdown
-										value={country}
-										onChange={country =>
-											this.setState({
-												country,
-												region: '',
-												locality: ''
-											})
-										}
-										classes="country-region-select"
-										defaultOptionLabel="country"
-									/>
-								</div>
-							</div>
-							<div className="position-relative">
-								<div className="left-asterisk">
-									<RegionDropdown
-										country={country}
-										value={region}
-										onChange={region =>
-											this.setState({
-												region
-											})
-										}
-										classes="country-region-select"
-										defaultOptionLabel={regionLabel}
-										disabled={!country}
-										blankOptionLabel={regionLabel}
-									/>
-								</div>
-							</div>
-							<div className="position-relative">
-								<div className="left-asterisk">
-									<RegionDropdown
-										country={country}
-										value={locality}
-										onChange={locality =>
-											this.setState({
-												locality
-											})
-										}
-										classes="country-region-select"
-										defaultOptionLabel="locality"
-										disabled={!region}
-										blankOptionLabel="locality"
-									/>
-								</div>
-							</div>
+							<Select
+								className="left-asterisk"
+								onChange={({ value }) =>
+									this.selectCountry(value)
+								}
+								options={[
+									{ label: i18next.t('country'), value: '' },
+									...countries
+								]}
+							/>
+							<Select
+								className="left-asterisk"
+								onChange={({ value }) =>
+									this.setState({ region: value })
+								}
+								options={[
+									{ label: regionLabel, value: '' },
+									...regions
+								]}
+								disabled={!country}
+							/>
 						</div>
 						<div>
-							<div className="position-relative">
-								<div className="left-asterisk">
-									<CountryDropdown
-										value={nationality}
-										onChange={nationality =>
-											this.setState({
-												nationality
-											})
-										}
-										classes="country-region-select"
-										defaultOptionLabel="nationality"
-									/>
-								</div>
-							</div>
 							<Select
-								type="age"
 								className="left-asterisk"
-								onChange={age => this.setState({ age })}
+								onChange={({ value }) =>
+									this.setState({
+										nationality: value
+									})
+								}
+								options={[
+									{
+										label: i18next.t('nationality'),
+										value: ''
+									},
+									...countries
+								]}
+							/>
+							<Select
+								className="left-asterisk"
+								onChange={({ value }) =>
+									this.setState({ age: value })
+								}
+								options={[
+									{
+										label: i18next.t('age'),
+										value: ''
+									},
+									...ages
+								]}
 							/>
 						</div>
 					</div>
@@ -223,7 +229,7 @@ class Register extends PureComponent {
 									changeHandler={height =>
 										this.setState({ height })
 									}
-									placeholder="height"
+									placeholder={i18next.t('height')}
 									type="number"
 									min={1}
 									max={300}
@@ -238,7 +244,7 @@ class Register extends PureComponent {
 									changeHandler={chest =>
 										this.setState({ chest })
 									}
-									placeholder="chest"
+									placeholder={i18next.t('chest')}
 									type="number"
 									min={1}
 									max={300}
@@ -255,7 +261,7 @@ class Register extends PureComponent {
 									changeHandler={waist =>
 										this.setState({ waist })
 									}
-									placeholder="waist"
+									placeholder={i18next.t('waist')}
 									type="number"
 									min={1}
 									max={300}
@@ -270,7 +276,7 @@ class Register extends PureComponent {
 									changeHandler={thighs =>
 										this.setState({ thighs })
 									}
-									placeholder="thighs"
+									placeholder={i18next.t('thighs')}
 									type="number"
 									min={1}
 									max={300}
@@ -287,7 +293,7 @@ class Register extends PureComponent {
 									changeHandler={weight =>
 										this.setState({ weight })
 									}
-									placeholder="weight"
+									placeholder={i18next.t('weight')}
 									type="number"
 									min={1}
 									max={300}
@@ -314,7 +320,7 @@ class Register extends PureComponent {
 								/>
 								<span className="checkbox-icon" />
 								<span className="ml-2">
-									I did some plastic operations
+									{i18next.t('I did some plastic operations')}
 								</span>
 							</label>
 						</div>
@@ -331,7 +337,9 @@ class Register extends PureComponent {
 								/>
 								<span className="checkbox-icon" />
 								<span className="ml-2">
-									I never did plastic operations
+									{i18next.t(
+										'I never did plastic operations'
+									)}
 								</span>
 							</label>
 						</div>
@@ -340,7 +348,7 @@ class Register extends PureComponent {
 				<div className="row">
 					<div className="col-12 mt-5 mb-3">
 						<h1 className="text-uppercase h2 text-center">
-							photos
+							{i18next.t('photos')}
 						</h1>
 						<p className="text-center">
 							(add at least 1 photo, maximum - 5)
@@ -356,7 +364,9 @@ class Register extends PureComponent {
 									type="checkbox"
 								/>
 								<span className="checkbox-icon checkbox-icon--rect" />
-								<span className="ml-2">main photo</span>
+								<span className="ml-2">
+									{i18next.t('main photo')}
+								</span>
 							</label>
 						</div>
 					</div>
@@ -428,14 +438,14 @@ class Register extends PureComponent {
 							className="mb-5"
 							href="#!"
 						>
-							add more
+							{i18next.t('add more')}
 						</a>
 					</div>
 				)}
 				<div className="d-flex align-items-center justify-content-between">
 					<Button
 						className="text-uppercase"
-						label="submit"
+						label={i18next.t('submit')}
 						loading={registration}
 						onClick={() => this.register()}
 					/>

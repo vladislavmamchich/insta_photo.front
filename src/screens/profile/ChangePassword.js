@@ -1,10 +1,9 @@
 import React, { PureComponent } from 'react'
 import { connect } from 'react-redux'
 import { toast } from 'react-toastify'
-// import i18next from 'i18next'
+import i18next from 'i18next'
 
 import { t_changePassword } from '../../redux/tracks'
-// import Select from '../../components/common/Select'
 import Input from '../../components/common/Input'
 import Button from '../../components/common/Button'
 
@@ -21,15 +20,19 @@ class ChangePassword extends PureComponent {
 		const { old_password, new_password, repeat_password } = this.state
 		let err = false
 		if (!old_password) {
-			toast.warn('Enter old password, please')
+			toast.warn(i18next.t('Enter old password, please'))
 			err = true
 		}
-		if (!new_password) {
-			toast.warn('Enter new password, please')
+		if (new_password.length < 6 || new_password.length > 12) {
+			toast.warning(
+				i18next.t(
+					'New password min length is 6 characters, max length is 12 characters'
+				)
+			)
 			err = true
 		}
 		if (new_password !== repeat_password) {
-			toast.warn('New passwords do not match')
+			toast.warn(i18next.t('New passwords do not match'))
 			err = true
 		}
 		if (!err) {
@@ -73,7 +76,7 @@ class ChangePassword extends PureComponent {
 											old_password
 										})
 									}
-									placeholder="old password"
+									placeholder={i18next.t('old password')}
 									type={show_pass ? 'text' : 'password'}
 									autoComplete="new-password"
 								/>
@@ -86,7 +89,7 @@ class ChangePassword extends PureComponent {
 											new_password
 										})
 									}
-									placeholder="new password"
+									placeholder={i18next.t('new password')}
 									type={show_pass ? 'text' : 'password'}
 									autoComplete="new-password"
 								/>
@@ -99,7 +102,9 @@ class ChangePassword extends PureComponent {
 											repeat_password
 										})
 									}
-									placeholder="repeat new password"
+									placeholder={i18next.t(
+										'repeat new password'
+									)}
 									type={show_pass ? 'text' : 'password'}
 									autoComplete="new-password"
 								/>
@@ -119,13 +124,15 @@ class ChangePassword extends PureComponent {
 										type="checkbox"
 									/>
 									<span className="checkbox-icon checkbox-icon--rect" />
-									<span className="ml-2">show passwords</span>
+									<span className="ml-2">
+										{i18next.t('show passwords')}
+									</span>
 								</label>
 							</div>
 							<div className="d-flex ml-4 mt-4">
 								<Button
 									className="text-uppercase"
-									label="submit"
+									label={i18next.t('submit')}
 									loading={loading}
 									onClick={() => this.changePassword()}
 								/>

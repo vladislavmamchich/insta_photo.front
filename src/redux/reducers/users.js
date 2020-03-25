@@ -5,11 +5,10 @@ const initialFilter = {
 	showMe: false,
 	showFavourites: false,
 	sort: 'date',
-	country: 'all',
-	region: 'all',
-	locality: 'all',
-	nationality: 'all',
-	age: 'all',
+	country: '',
+	region: '',
+	nationality: '',
+	age: '',
 	order: -1
 }
 
@@ -21,8 +20,9 @@ const initialState = {
 	filter: initialFilter,
 	modalUser: null,
 	totalLikes: null,
-	countries: null,
-	nationalities: null
+	countriesObj: null,
+	countriesGeonamesIds: null,
+	nationalitiesGeonamesIds: null
 }
 
 export default function usersReducer(state = initialState, { type, payload }) {
@@ -31,7 +31,6 @@ export default function usersReducer(state = initialState, { type, payload }) {
 			return { ...state, all: payload }
 		case 'PUSH_USERS_MAIN_IMAGES':
 			if (state.images) {
-				// console.log(state.images.page, payload.images.page)
 				if (state.images.page < payload.images.page) {
 					return {
 						...state,
@@ -40,15 +39,18 @@ export default function usersReducer(state = initialState, { type, payload }) {
 							docs: [...state.images.docs, ...payload.images.docs]
 						}
 					}
+				} else {
+					return {
+						...state,
+						images: payload.images
+					}
 				}
 			} else {
 				return {
 					...state,
 					images: payload.images
-					// images: payload.images.totalDocs > 0 ? payload.images : null
 				}
 			}
-			return state
 		case 'SET_USERS':
 			return { ...state, users: payload }
 		case 'SET_USER_INFO':
@@ -157,8 +159,17 @@ export default function usersReducer(state = initialState, { type, payload }) {
 		case 'SET_MODAL_USER':
 			return { ...state, modalUser: payload }
 		case 'SET_GEO':
-			const { countries, nationalities } = payload
-			return { ...state, countries, nationalities }
+			const {
+				countriesObj,
+				countriesGeonamesIds,
+				nationalitiesGeonamesIds
+			} = payload
+			return {
+				...state,
+				countriesObj,
+				countriesGeonamesIds,
+				nationalitiesGeonamesIds
+			}
 		case 'CLEAR_MAIN_IMAGES':
 			return { ...state, images: null }
 		case 'SET_TOTAL_LIKES':

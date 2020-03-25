@@ -1,11 +1,8 @@
 import React, { useEffect, useState, Fragment } from 'react'
-// import { connect } from 'react-redux'
 import { useSelector, useDispatch } from 'react-redux'
 import InfiniteScroll from 'react-infinite-scroll-component'
-// import { NavLink } from 'react-router-dom'
 
-// import { toast } from 'react-toastify'
-// import i18next from 'i18next'
+import i18next from 'i18next'
 
 import { t_images, t_getGeo } from '../redux/tracks'
 import { weightConverter, heightConverter } from '../utils/helpers'
@@ -18,7 +15,7 @@ const Main = () => {
 	const [loading, setLoading] = useState(false)
 	const dispatch = useDispatch()
 	const {
-		data: { main_photo, favourites }
+		data: { main_photo }
 	} = useSelector(store => store.profile)
 	const {
 		images,
@@ -30,24 +27,33 @@ const Main = () => {
 			age,
 			country,
 			nationality,
-			region,
-			locality
+			region
 		},
 		totalLikes
 	} = useSelector(store => store.users)
+
 	const fetchImages = async page => {
 		setLoading(true)
-		await dispatch(await t_images({ page }))
+		await dispatch(
+			await t_images({
+				page,
+				favourites: showFavourites,
+				country,
+				nationality,
+				region,
+				age
+			})
+		)
 		setLoading(false)
 	}
+
+	useEffect(() => {
+		fetchImages(1)
+	}, [showFavourites, country, nationality, region, age])
+
 	useEffect(() => {
 		const el = document.querySelector('.logo')
 		el && el.scrollIntoView({ block: 'start', behavior: 'smooth' })
-		// if (!images) {
-		fetchImages(1)
-		// }
-	}, [])
-	useEffect(() => {
 		dispatch(t_getGeo())
 	}, [])
 	const byDate = (a, b) => {
@@ -166,28 +172,9 @@ const Main = () => {
 		}
 	}
 	if (images) {
-		let list = showFavourites
-			? images.docs.filter(i => favourites.includes(i._id))
-			: images.docs
-		// list = showMe
-		// 	? [main_photo, ...list.filter(i => i._id !== main_photo._id)]
-		// 	: list
-		list =
-			country !== 'all'
-				? list.filter(i => i.user.country === country)
-				: list
-		list =
-			region !== 'all' ? list.filter(i => i.user.region === region) : list
-		list =
-			locality !== 'all'
-				? list.filter(i => i.user.locality === locality)
-				: list
-		list =
-			nationality !== 'all'
-				? list.filter(i => i.user.nationality === nationality)
-				: list
-		list = age !== 'all' ? list.filter(i => +i.user.age === +age) : list
-		list = showMe ? [main_photo, ...getSorted(list)] : getSorted(list)
+		const list = showMe
+			? [main_photo, ...getSorted(images.docs)]
+			: getSorted(images.docs)
 		return (
 			<Fragment>
 				<div className="d-flex justify-content-start">
@@ -195,7 +182,7 @@ const Main = () => {
 				</div>
 				{images.docs.length || showMe ? (
 					<InfiniteScroll
-						dataLength={images.limit}
+						dataLength={images.docs.length}
 						next={() => fetchImages(images.nextPage)}
 						hasMore={images.hasNextPage}
 						className="products-container mt-4"
@@ -209,16 +196,16 @@ const Main = () => {
 								/>
 							))
 						) : (
-							<div>Not found</div>
+							<div>{i18next.t('Not found')}</div>
 						)}
 					</InfiniteScroll>
 				) : (
-					<div className="my-5">Not images yet</div>
+					<div className="my-5">{i18next.t('Not images yet')}</div>
 				)}
 
 				{loading && (
 					<div className="d-flex justify-content-center align-items-center mt-4">
-						<h4>Loading...</h4>
+						<h4>{i18next.t('Loading')}...</h4>
 					</div>
 				)}
 			</Fragment>

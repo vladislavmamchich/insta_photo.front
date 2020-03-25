@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import moment from 'moment'
-
-// import { toast } from 'react-toastify'
-// import i18next from 'i18next'
+import i18next from 'i18next'
 
 import {
 	t_loadUser,
@@ -50,22 +48,17 @@ const User = props => {
 	}
 	const favourite = async () => {
 		if (data.favourites.includes(user.images[index]._id)) {
-			// if (user.images[index].favourites.includes(data._id)) {
 			dispatch(
 				t_removeFromFavourites({
 					image: user.images[index]
 				})
 			)
-			// user.images[index].favourites = user.images[
-			// 	index
-			// ].favourites.filter(i => i !== data._id)
 		} else {
 			dispatch(
 				t_addToFavourites({
 					image: user.images[index]
 				})
 			)
-			// user.images[index].favourites.push(data._id)
 			if (!user.images[index].likes.includes(data._id)) {
 				user.images[index].likes.push(data._id)
 				socket.emit('like', { image_id: user.images[index]._id })
@@ -82,7 +75,6 @@ const User = props => {
 			thighs,
 			country,
 			region,
-			locality,
 			nationality,
 			age,
 			operations,
@@ -93,9 +85,8 @@ const User = props => {
 			weight_unit
 		} = user
 		const is_me = _id === data._id
-		// const in_favourites = images[index].favourites.includes(data._id)
 		const in_favourites = data.favourites.includes(images[index]._id)
-		const regionLabel = country === 'United States' ? 'State' : 'Region'
+		const regionLabel = country === 6252001 ? 'State' : 'Region'
 		const image_id = location
 			? new URLSearchParams(location.search).get('image_id')
 			: 0
@@ -103,8 +94,12 @@ const User = props => {
 		return (
 			<div className="product-overview position-relative">
 				<div className="d-flex align-items-center justify-content-between top-line">
-					<p className="font-20">User #{_id}</p>
-					<p className="font-20">User #{_id}</p>
+					<p className="font-20">
+						{i18next.t('User')} #{_id}
+					</p>
+					<p className="font-20">
+						{i18next.t('User')} #{_id}
+					</p>
 				</div>
 				<div className="d-flex justify-content-center">
 					<div
@@ -156,21 +151,26 @@ const User = props => {
 				<div className="overview-details mt-5 d-flex flex-column flex-xl-row justify-content-center">
 					<div className="d-flex flex-wrap p-2 wrapper">
 						<div className="mr-3">
-							<p className="mb-1">Country: {country}</p>
+							<p className="mb-1">
+								{i18next.t('Country')}: {country}
+							</p>
 							<p className="mb-1">
 								{regionLabel}: {region}
 							</p>
 						</div>
 						<div className="mr-3">
-							<p className="mb-1">Locality: {locality}</p>
-							<p className="mb-1">Nationality: {nationality}</p>
+							<p className="mb-1">
+								{i18next.t('Nationality')}: {nationality}
+							</p>
 						</div>
 					</div>
 					<div className="d-flex flex-wrap p-2 wrapper center">
 						<div className="mr-3">
-							<p className="mb-1">Age: {age}</p>
 							<p className="mb-1">
-								Weight:{' '}
+								{i18next.t('Age')}: {age}
+							</p>
+							<p className="mb-1 text-capitalize">
+								{i18next.t('weight')}:{' '}
 								{weightConverter(
 									weight,
 									weight_unit,
@@ -180,8 +180,8 @@ const User = props => {
 							</p>
 						</div>
 						<div className="mr-3">
-							<p className="mb-1">
-								Height:{' '}
+							<p className="mb-1 text-capitalize">
+								{i18next.t('height')}:{' '}
 								{heightConverter(
 									height,
 									height_unit,
@@ -189,8 +189,8 @@ const User = props => {
 								)}{' '}
 								{heightUnit}
 							</p>
-							<p className="mb-1">
-								Chest:{' '}
+							<p className="mb-1 text-capitalize">
+								{i18next.t('chest')}:{' '}
 								{heightConverter(
 									chest,
 									height_unit,
@@ -200,8 +200,8 @@ const User = props => {
 							</p>
 						</div>
 						<div className="mr-3">
-							<p className="mb-1">
-								Waist:{' '}
+							<p className="mb-1 text-capitalize">
+								{i18next.t('waist')}:{' '}
 								{heightConverter(
 									waist,
 									height_unit,
@@ -209,8 +209,8 @@ const User = props => {
 								)}{' '}
 								{heightUnit}
 							</p>
-							<p className="mb-1">
-								Thigs:{' '}
+							<p className="mb-1 text-capitalize">
+								{i18next.t('thighs')}:{' '}
 								{heightConverter(
 									thighs,
 									height_unit,
@@ -223,10 +223,11 @@ const User = props => {
 					<div className="d-flex flex-wrap p-2 wrapper">
 						<div className="mr-3">
 							<p className="mb-1">
-								Operations: {operations ? 'yes' : 'no'}
+								{i18next.t('Operations')}:{' '}
+								{operations ? 'yes' : 'no'}
 							</p>
 							<p className="mb-1">
-								Registration date:{' '}
+								{i18next.t('Registration date')}:{' '}
 								{moment(created_at).format('DD/MM/YYYY')}
 							</p>
 						</div>

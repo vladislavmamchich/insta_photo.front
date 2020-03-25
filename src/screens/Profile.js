@@ -1,12 +1,6 @@
 import React, { PureComponent, Fragment } from 'react'
 import { connect } from 'react-redux'
-// import { NavLink } from 'react-router-dom'
-
-// import { toast } from 'react-toastify'
-// import i18next from 'i18next'
-
-// import { t_loadProfile } from '../redux/tracks'
-// import Select from '../components/common/Select'
+import i18next from 'i18next'
 
 import MyInfo from './profile/MyInfo'
 import Favourites from './profile/Favourites'
@@ -17,13 +11,14 @@ class Profile extends PureComponent {
 		activeTab: 1
 	}
 	componentDidMount() {
-		// this.props.loadProfile()
 		const el = document.querySelector('.logo')
 		el.scrollIntoView({ block: 'start', behavior: 'smooth' })
 	}
 	render() {
 		const { activeTab } = this.state
-		const { data } = this.props
+		const {
+			profile: { data }
+		} = this.props
 		return (
 			<Fragment>
 				<ul
@@ -39,7 +34,7 @@ class Profile extends PureComponent {
 							href="#!"
 							onClick={() => this.setState({ activeTab: 1 })}
 						>
-							My info
+							{i18next.t('My info')}
 						</a>
 					</li>
 					<li className="nav-item">
@@ -50,7 +45,7 @@ class Profile extends PureComponent {
 							href="#!"
 							onClick={() => this.setState({ activeTab: 2 })}
 						>
-							Favourites
+							{i18next.t('Favourites')}
 						</a>
 					</li>
 					<li className="nav-item">
@@ -61,7 +56,7 @@ class Profile extends PureComponent {
 							href="#!"
 							onClick={() => this.setState({ activeTab: 3 })}
 						>
-							Change password
+							{i18next.t('Change password')}
 						</a>
 					</li>
 				</ul>
@@ -80,12 +75,7 @@ class Profile extends PureComponent {
 
 const mapStateToProps = state => ({
 	loading: state.service.loading,
-	data: state.profile.data
-})
-const mapDispatchToProps = dispatch => ({
-	// loadProfile: () => {
-	// 	dispatch(t_loadProfile())
-	// }
+	profile: state.profile
 })
 
-export default connect(mapStateToProps, mapDispatchToProps)(Profile)
+export default connect(mapStateToProps)(Profile)

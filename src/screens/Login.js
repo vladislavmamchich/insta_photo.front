@@ -15,7 +15,7 @@ class Login extends PureComponent {
 		email: '',
 		password: '',
 		show_pass: false,
-		remember_me: false,
+		remember_me: true,
 		submitting: false,
 		captcha: ''
 	}
@@ -62,7 +62,6 @@ class Login extends PureComponent {
 			history
 		} = this.props
 		if (search) {
-			console.log(search)
 			const searchParams = new URLSearchParams(search.slice(1))
 			if (searchParams.has('emailRegisterToken')) {
 				const emailRegisterToken = searchParams.get(
@@ -88,7 +87,7 @@ class Login extends PureComponent {
 				<Input
 					classNames="ml-0"
 					changeHandler={email => this.setState({ email })}
-					placeholder="nickname / email"
+					placeholder={i18next.t('nickname / email')}
 					value={email}
 					type="email"
 				/>
@@ -96,7 +95,7 @@ class Login extends PureComponent {
 					classNames="ml-0 my-3"
 					changeHandler={password => this.setState({ password })}
 					type={show_pass ? 'text' : 'password'}
-					placeholder="password"
+					placeholder={i18next.t('password')}
 					autoComplete="new-password"
 					value={password}
 				/>
@@ -110,7 +109,9 @@ class Login extends PureComponent {
 							value={show_pass}
 						/>
 						<span className="checkbox-icon checkbox-icon--rect" />
-						<span className="ml-2">show password</span>
+						<span className="ml-2">
+							{i18next.t('show password')}
+						</span>
 					</label>
 				</div>
 				<div className="custom-checkbox">
@@ -120,27 +121,29 @@ class Login extends PureComponent {
 								this.setState({ remember_me: e.target.checked })
 							}
 							type="checkbox"
-							value={remember_me}
+							checked={remember_me}
 						/>
 						<span className="checkbox-icon checkbox-icon--rect" />
-						<span className="ml-2">remember me</span>
+						<span className="ml-2">{i18next.t('remember me')}</span>
 					</label>
 				</div>
 				<Captcha />
 				<Input
 					classNames="ml-0 mb-3"
 					changeHandler={captcha => this.setState({ captcha })}
-					placeholder="captcha"
+					placeholder={i18next.t('captcha')}
 				/>
 				<Button
 					loading={submitting}
 					onClick={() => this.submit()}
-					label="submit"
+					label={i18next.t('submit')}
 				/>
 				<div className="mx-auto mt-3">
-					<Link to="/">signup</Link>
+					<Link to="/">{i18next.t('signup')}</Link>
 					<span>&nbsp;|&nbsp;</span>
-					<Link to="/reset_pass">forgot password?</Link>
+					<Link to="/reset_pass">
+						{i18next.t('forgot password')}?
+					</Link>
 				</div>
 			</div>
 		)

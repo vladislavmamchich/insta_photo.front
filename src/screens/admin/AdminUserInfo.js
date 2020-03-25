@@ -1,27 +1,45 @@
 import React, { useEffect, useState } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector, useDispatch, useStore } from 'react-redux'
 import styled from 'styled-components'
-
-// import { toast } from 'react-toastify'
-// import i18next from 'i18next'
 import { t_loadUserInfo, t_userModeration } from '../../redux/tracks'
+import { getGeonames } from '../../constants'
 
 import Button from '../../components/common/Button'
 import UserPhoto from './UserPhoto'
+
+const geonames = getGeonames()
 
 const AdminUserInfo = props => {
 	const {
 		match: { params },
 		history
 	} = props
-
 	const dispatch = useDispatch()
 	const user = useSelector(store => store.users.user)
+	const store = useStore()
 
 	const [loading, setLoading] = useState(false)
+	const [country, setCountry] = useState('')
+	const [region, setRegion] = useState('')
+	const [nationality, setNationality] = useState('')
 
 	const loadUserInfo = async () => {
 		await dispatch(t_loadUserInfo({ user_id: params.id }))
+		const { country, nationality, region } = store.getState().users.user
+		const countries = await geonames.countryInfo({})
+		const countryObj = countries.geonames.find(
+			c => +c.geonameId === +country
+		)
+		const regions = await geonames.children({
+			geonameId: countryObj.geonameId
+		})
+		const regionObj = regions.geonames.find(r => +r.geonameId === +region)
+		setCountry(countryObj.countryName)
+		setNationality(
+			countries.geonames.find(c => +c.geonameId === +nationality)
+				.countryName
+		)
+		setRegion(regionObj.name)
 	}
 
 	useEffect(() => {
@@ -33,6 +51,7 @@ const AdminUserInfo = props => {
 		await dispatch(t_userModeration({ user_id, moderated }))
 		setLoading(false)
 	}
+
 	if (user) {
 		const {
 			_id,
@@ -42,15 +61,11 @@ const AdminUserInfo = props => {
 			nickname,
 			age,
 			sex,
-			country,
-			locality,
-			nationality,
 			height,
 			chest,
 			waist,
 			thighs,
 			weight,
-			region,
 			images,
 			main_photo
 		} = user
@@ -85,7 +100,6 @@ const AdminUserInfo = props => {
 					<div className="col-lg-4 col-12">
 						<div>Country: {country}</div>
 						<div>Region: {region}</div>
-						<div>Locality: {locality}</div>
 						<div>Nationality: {nationality}</div>
 					</div>
 					<div className="col-lg-4 col-12">
@@ -120,13 +134,4 @@ const Styles = styled.div`
 		color: black;
 	}
 `
-
-// const mapStateToProps = state => ({
-// 	language: state.profile.language
-// })
-// const mapDispatchToProps = dispatch => ({
-// 	setIsAdmin: payload => dispatch(a_setIsAdmin(payload)),
-// 	loadUserInfo: payload => dispatch(t_loadUserInfo(payload))
-// })
-// export default connect(mapStateToProps, mapDispatchToProps)(AdminUserInfo)
 export default AdminUserInfo

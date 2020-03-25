@@ -1,5 +1,4 @@
 import io from 'socket.io-client'
-// import { toast } from 'react-toastify'
 
 import { store } from '../redux/store'
 import { t_loadUsers } from '../redux/tracks'
@@ -34,20 +33,15 @@ export const connectToSocket = () => {
             }
         })
         socket.on('disconnect', reason => {
-            console.log(reason)
             if (reason === 'io server disconnect') {
                 socket.connect()
             }
         })
-        socket.on('connect', () => {
-            console.log('connect')
-        })
-        socket.on('server_error', msg => {
-            console.log('server_error', msg)
-        })
+        // socket.on('connect', () => {
+        //     console.log('connect')
+        // })
+        // socket.on('server_error', msg => {
+        //     console.log('server_error', msg)
+        // })
     }
-}
-
-export const disconnectFromSocket = () => {
-    socket.disconnect()
 }

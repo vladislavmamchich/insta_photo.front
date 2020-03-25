@@ -1,7 +1,6 @@
 import React, { PureComponent } from 'react'
 import { Link } from 'react-router-dom'
 import { connect } from 'react-redux'
-// import { toast } from 'react-toastify'
 import i18next from 'i18next'
 
 import {
@@ -97,7 +96,7 @@ class Header extends PureComponent {
 					<Select
 						width="95px"
 						options={languages}
-						onChange={lang => setLanguage(lang)}
+						onChange={({ value }) => setLanguage(value)}
 						selected={language}
 					/>
 				</div>

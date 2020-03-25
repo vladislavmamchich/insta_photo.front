@@ -67,7 +67,7 @@ const UserPhoto = ({ image, main_photo, index }) => {
 		}
 	}
 	const checked = main_photo ? image._id === main_photo._id : false
-
+	console.log(image)
 	return (
 		<div className="row mb-5">
 			{viewImage && (
@@ -126,8 +126,8 @@ const UserPhoto = ({ image, main_photo, index }) => {
 					{action === 'deleting' ? (
 						<FontAwesomeIcon icon={faCircleNotch} spin />
 					) : (
-						<a
-							style={{ color: 'black' }}
+						<button
+							style={{ padding: '5px 20px' }}
 							href="#!"
 							onClick={() =>
 								dispatch(
@@ -139,9 +139,10 @@ const UserPhoto = ({ image, main_photo, index }) => {
 									})
 								)
 							}
+							disabled={checked}
 						>
 							Delete
-						</a>
+						</button>
 					)}
 				</div>
 			</div>

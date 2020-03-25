@@ -6,12 +6,9 @@ import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.min.css'
 import LanguageDetector from 'i18next-browser-languagedetector'
 
-import { a_setLanguage } from './redux/actions'
-
 import Personal from './routes/Personal'
 
 import Header from './components/Header'
-import Footer from './components/Footer'
 
 import Loader from './components/service/Loader'
 import ServerError from './components/service/ServerError'
@@ -19,7 +16,6 @@ import Modal from './components/service/Modal'
 
 import ModalWindow from './components/common/ModalWindow'
 
-import Welcome from './screens/Welcome'
 import Login from './screens/Login'
 import Register from './screens/Register'
 import ResetPassword from './screens/ResetPassword'
@@ -32,7 +28,8 @@ import 'ladda/dist/ladda.min.css'
 import './styles/main.css'
 import './index.css'
 
-// const Personal = lazy(() => import('./components/personal'))
+const Welcome = lazy(() => import('./screens/Welcome'))
+const Footer = lazy(() => import('./components/Footer'))
 const NotFound = lazy(() => import('./components/service/NotFound'))
 
 class App extends PureComponent {
@@ -99,8 +96,8 @@ class App extends PureComponent {
                                 ) : (
                                     <Personal />
                                 )}
+                                {!isAdmin && <Footer />}
                             </Suspense>
-                            {!isAdmin && <Footer />}
                         </div>
                     </Router>
                 )}
@@ -110,13 +107,7 @@ class App extends PureComponent {
 }
 
 const mapStateToProps = state => ({
-    service: state.service,
-    language: state.profile.language
+    service: state.service
 })
 
-const mapDispatchToProps = dispatch => ({
-    setLanguage: payload => {
-        dispatch(a_setLanguage(payload))
-    }
-})
-export default connect(mapStateToProps, mapDispatchToProps)(App)
+export default connect(mapStateToProps)(App)

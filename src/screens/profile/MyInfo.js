@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import moment from 'moment'
 import { withRouter } from 'react-router-dom'
 import { toast } from 'react-toastify'
-// import i18next from 'i18next'
+import i18next from 'i18next'
 
 import { a_setModal } from '../../redux/actions'
 import {
@@ -19,12 +19,15 @@ import {
 	heightConverter,
 	isValidEmail
 } from '../../utils/helpers'
+import { getGeonames } from '../../constants'
 
 import Input from '../../components/common/Input'
 import RegisterData from '../../components/profile/RegisterData'
 import Loader from '../../components/service/Loader'
 
 const { REACT_APP_SERVER } = process.env
+
+const geonames = getGeonames()
 
 class MyInfo extends PureComponent {
 	state = {
@@ -35,24 +38,59 @@ class MyInfo extends PureComponent {
 		secret_word: '',
 		register: false,
 		allow_share_email: false,
-		emailing: false
+		emailing: false,
+		country: '',
+		nationality: '',
+		region: ''
 	}
 
-	componentDidMount() {
+	async componentDidMount() {
 		const {
 			profile: {
-				data: { nickname, email, secret_word, allow_share_email }
+				data: {
+					nickname,
+					email,
+					secret_word,
+					allow_share_email,
+					country,
+					nationality,
+					region
+				}
 			},
 			location: { search },
 			updateEmail,
 			history
 		} = this.props
-		this.setState({
-			nickname,
-			email,
-			secret_word,
-			allow_share_email
-		})
+		if (country) {
+			const countries = await geonames.countryInfo({})
+			const countryObj = countries.geonames.find(
+				c => +c.geonameId === +country
+			)
+			const regions = await geonames.children({
+				geonameId: countryObj.geonameId
+			})
+			const regionObj = regions.geonames.find(
+				r => +r.geonameId === +region
+			)
+			this.setState({
+				nickname,
+				email,
+				secret_word,
+				allow_share_email,
+				country: countryObj.countryName,
+				nationality: countries.geonames.find(
+					c => +c.geonameId === +nationality
+				).countryName,
+				region: regionObj.name
+			})
+		} else {
+			this.setState({
+				nickname,
+				email,
+				secret_word,
+				allow_share_email
+			})
+		}
 		if (search) {
 			const searchParams = new URLSearchParams(search.slice(1))
 			if (searchParams.has('emailToken')) {
@@ -88,12 +126,20 @@ class MyInfo extends PureComponent {
 				this.setState({ emailing: false })
 			}
 		} else {
-			toast.warning('Enter valid email')
+			toast.warning(i18next.t('Enter valid email'))
 		}
 	}
 	saveSecretWord = async () => {
 		const { secret_word } = this.state
-		this.props.changeSecretWord({ secret_word })
+		if (secret_word.length < 3 || secret_word.length > 20) {
+			toast.warning(
+				i18next.t(
+					'Secret word min length is 3 characters, max length is 20 characters'
+				)
+			)
+		} else {
+			this.props.changeSecretWord({ secret_word })
+		}
 	}
 
 	render() {
@@ -109,14 +155,13 @@ class MyInfo extends PureComponent {
 			email,
 			allow_share_email,
 			secret_word,
-			emailing
+			emailing,
+			country,
+			nationality,
+			region
 		} = this.state
 		const isObserver = data.role === 'observer'
 		const {
-			country,
-			region,
-			locality,
-			nationality,
 			age,
 			height,
 			weight,
@@ -151,7 +196,7 @@ class MyInfo extends PureComponent {
 									onClick={() => this.saveNickname()}
 									className="ml-3 btn-link link-active-outline"
 								>
-									update
+									{i18next.t('update')}
 								</button>
 							</div>
 							{data.one_time_password && (
@@ -164,7 +209,7 @@ class MyInfo extends PureComponent {
 													password
 												})
 											}
-											placeholder="password"
+											placeholder={i18next.t('password')}
 											type={
 												show_pass ? 'text' : 'password'
 											}
@@ -188,7 +233,7 @@ class MyInfo extends PureComponent {
 											/>
 											<span className="checkbox-icon checkbox-icon--rect" />
 											<span className="ml-2">
-												show password
+												{i18next.t('show password')}
 											</span>
 										</label>
 									</div>
@@ -201,14 +246,14 @@ class MyInfo extends PureComponent {
 										this.setState({ email })
 									}
 									type="email"
-									placeholder="email"
+									placeholder={i18next.t('email')}
 								/>
 								<div className="d-flex">
 									<button
 										onClick={() => this.saveEmail()}
 										className="ml-3 btn-link link-active-outline"
 									>
-										update
+										{i18next.t('update')}
 									</button>
 									{emailing && (
 										<Loader style={{ fontSize: 14 }} />
@@ -224,7 +269,7 @@ class MyInfo extends PureComponent {
 									/>
 									<span className="checkbox-icon checkbox-icon--rect" />
 									<span className="ml-2">
-										allow share my email
+										{i18next.t('allow share my email')}
 									</span>
 								</label>
 							</div>
@@ -234,13 +279,13 @@ class MyInfo extends PureComponent {
 									changeHandler={secret_word =>
 										this.setState({ secret_word })
 									}
-									placeholder="secret word"
+									placeholder={i18next.t('secret word')}
 								/>
 								<button
 									onClick={() => this.saveSecretWord()}
 									className="ml-3 btn-link link-active-outline"
 								>
-									update
+									{i18next.t('update')}
 								</button>
 							</div>
 						</div>
@@ -266,7 +311,7 @@ class MyInfo extends PureComponent {
 								{data.role}
 							</p>
 							<p className="text-center mb-0">
-								registration date:
+								{i18next.t('registration date')}:
 							</p>
 							<p className="text-center">
 								{moment(data.created_at).format('DD/MM/YYYY')}
@@ -296,7 +341,7 @@ class MyInfo extends PureComponent {
 								</label>
 							</div>
 							<p className="text-center font-18">
-								become a PARTICIPANT
+								{i18next.t('become a PARTICIPANT')}
 							</p>
 							{register && <RegisterData />}
 						</div>
@@ -308,7 +353,7 @@ class MyInfo extends PureComponent {
 							<div className="row">
 								<div className="col-12 mt-3 mb-3">
 									<h1 className="text-uppercase h2 text-center text-uppercase">
-										information
+										{i18next.t('information')}
 									</h1>
 								</div>
 							</div>
@@ -316,31 +361,29 @@ class MyInfo extends PureComponent {
 								<div className="col-xl-5 col-lg-6 col-md-12 flex-wrap d-flex flex-column flex-md-row">
 									<div className="mr-5">
 										<p className="mb-1 no-wrap">
-											Country: {country}
+											{i18next.t('Country')}: {country}
 										</p>
 										<p className="mb-1 no-wrap">
-											{country === 'United States'
-												? 'State'
-												: 'Region'}
+											{country === 6252001
+												? i18next.t('State')
+												: i18next.t('Region')}
 											: {region}
-										</p>
-										<p className="mb-1 no-wrap">
-											Locality: {locality}
 										</p>
 									</div>
 									<div>
 										<p className="mb-1 no-wrap">
-											Nationality: {nationality}
+											{i18next.t('Nationality')}:{' '}
+											{nationality}
 										</p>
 										<p className="mb-1 no-wrap">
-											Age: {age}
+											{i18next.t('Age')}: {age}
 										</p>
 									</div>
 								</div>
 								<div className="col-xl-6 col-lg-6 col-md-12 flex-wrap d-flex flex-column flex-md-row">
 									<div className="mr-5">
-										<p className="mb-1 no-wrap">
-											Height:{' '}
+										<p className="mb-1 no-wrap text-capitalize">
+											{i18next.t('height')}:{' '}
 											{heightConverter(
 												height,
 												height_unit,
@@ -348,8 +391,8 @@ class MyInfo extends PureComponent {
 											)}{' '}
 											{heightUnit}
 										</p>
-										<p className="mb-1 no-wrap">
-											Chest:{' '}
+										<p className="mb-1 no-wrap text-capitalize">
+											{i18next.t('chest')}:{' '}
 											{heightConverter(
 												chest,
 												height_unit,
@@ -357,8 +400,8 @@ class MyInfo extends PureComponent {
 											)}{' '}
 											{heightUnit}
 										</p>
-										<p className="mb-1 no-wrap">
-											Waist:{' '}
+										<p className="mb-1 no-wrap text-capitalize">
+											{i18next.t('waist')}:{' '}
 											{heightConverter(
 												waist,
 												height_unit,
@@ -368,8 +411,8 @@ class MyInfo extends PureComponent {
 										</p>
 									</div>
 									<div>
-										<p className="mb-1 no-wrap">
-											Thighs:{' '}
+										<p className="mb-1 no-wrap text-capitalize">
+											{i18next.t('thighs')}:{' '}
 											{heightConverter(
 												thighs,
 												height_unit,
@@ -377,8 +420,8 @@ class MyInfo extends PureComponent {
 											)}{' '}
 											{heightUnit}
 										</p>
-										<p className="mb-1 no-wrap">
-											Weight:{' '}
+										<p className="mb-1 no-wrap text-capitalize">
+											{i18next.t('weight')}:{' '}
 											{weightConverter(
 												weight,
 												weight_unit,
@@ -387,8 +430,10 @@ class MyInfo extends PureComponent {
 											{weightUnit}
 										</p>
 										<p className="mb-1 no-wrap">
-											Operations:{' '}
-											{operations ? 'yes' : 'no'}
+											{i18next.t('Operations')}:{' '}
+											{operations
+												? i18next.t('yes')
+												: i18next.t('no')}
 										</p>
 									</div>
 								</div>
@@ -396,7 +441,7 @@ class MyInfo extends PureComponent {
 							<div className="row">
 								<div className="col-12 mt-3 mb-3">
 									<h1 className="text-uppercase h2 text-center text-uppercase">
-										Photos
+										{i18next.t('Photos')}
 									</h1>
 								</div>
 								<div className="col-12 user-images">
@@ -421,7 +466,7 @@ class MyInfo extends PureComponent {
 											/>
 											{i._id === main_photo._id && (
 												<div className="is-main-photo">
-													main photo
+													{i18next.t('main photo')}
 												</div>
 											)}
 										</div>
@@ -433,7 +478,7 @@ class MyInfo extends PureComponent {
 							<a
 								onClick={() =>
 									setModal({
-										title: 'You sure?',
+										title: `${i18next.t('Are you sure')}?`,
 										onClick: async () =>
 											await activation({
 												is_active: !is_active
@@ -444,8 +489,8 @@ class MyInfo extends PureComponent {
 								href="#!"
 							>
 								{is_active
-									? 'deactivate the account'
-									: 'activate the account'}
+									? i18next.t('deactivate the account')
+									: i18next.t('activate the account')}
 							</a>
 						</div>
 					</Fragment>
@@ -453,8 +498,9 @@ class MyInfo extends PureComponent {
 					!moderated &&
 					ex_observer && (
 						<div className="mt-5">
-							Information and photos will appear here, after going
-							through moderation by admin
+							{i18next.t(
+								'Information and photos will appear here, after going through moderation by admin'
+							)}
 						</div>
 					)
 				)}
@@ -470,9 +516,6 @@ const mapDispatchToProps = dispatch => ({
 	setModal: payload => {
 		dispatch(a_setModal(payload))
 	},
-	// checkUniq: async payload => {
-	// 	await dispatch(t_checkUniq(payload))
-	// },
 	activation: async payload => {
 		await dispatch(t_activation(payload))
 	},

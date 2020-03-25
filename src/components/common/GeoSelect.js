@@ -99,17 +99,17 @@ class GeoSelect extends Component {
             onChange(selectedOption)
         }
     }
-    // componentDidUpdate() {
-    //     const { selected, options } = this.props
-    //     const { selectedOption } = this.state
-    //     if (selected !== undefined && selectedOption.value !== selected) {
-    //         this.setState({
-    //             selectedOption:
-    //                 options.find(o => o === selected || o.value === selected) ||
-    //                 options[0]
-    //         })
-    //     }
-    // }
+    componentDidUpdate() {
+        const { selected, options } = this.props
+        const { selectedOption } = this.state
+        if (selected !== undefined && selectedOption.value !== selected) {
+            this.setState({
+                selectedOption:
+                    options.find(o => o === selected || o.value === selected) ||
+                    options[0]
+            })
+        }
+    }
     componentDidMount() {
         const { options, selected } = this.props
         if (options) {

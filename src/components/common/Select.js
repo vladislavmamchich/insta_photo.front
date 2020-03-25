@@ -1,15 +1,9 @@
 import React, { Component } from 'react'
 import ReactSelect from 'react-select'
 
-import { colors, sex, ages } from '../../constants'
+import { colors } from '../../constants'
 
 const height = 24
-
-const defOptions = [
-    { value: 'all countries', label: 'all countries' },
-    { value: 'all regions', label: 'all regions' },
-    { value: 'all localities', label: 'all localities' }
-]
 
 const customStyles = {
     option: (provided, state) => ({
@@ -85,11 +79,6 @@ class Select extends Component {
         placeholder: 'Select'
     }
     static getDerivedStateFromProps(nextProps, prevState) {
-        // console.log(
-        //     nextProps.options,
-        //     prevState.options,
-        //     prevState.selectedOption
-        // )
         if (
             nextProps.options &&
             (nextProps.options.length !== prevState.options.length ||
@@ -107,7 +96,7 @@ class Select extends Component {
         const { onChange } = this.props
         this.setState({ selectedOption })
         if (onChange instanceof Function) {
-            onChange(selectedOption.value)
+            onChange(selectedOption)
         }
     }
     componentDidUpdate() {
@@ -122,35 +111,13 @@ class Select extends Component {
         }
     }
     componentDidMount() {
-        const { type, options, selected } = this.props
-        let selectedOption
+        const { options, selected } = this.props
         if (options) {
-            selectedOption = options[0]
+            let selectedOption = options[0]
             if (selected) {
                 selectedOption = options.find(o => o === selected) || options[0]
             }
             this.setState({ options, selectedOption })
-        } else {
-            // this.setState({ options: [type], selectedOption: [type][0] })
-            switch (type) {
-                case 'sex':
-                    selectedOption =
-                        sex.find(o => o.value === selected) || sex[0]
-                    this.setState({ options: sex, selectedOption })
-                    break
-                case 'ages':
-                    this.setState({ options: ages, selectedOption: ages[0] })
-                    break
-                case 'age':
-                    this.setState({
-                        options: ages.slice(1),
-                        selectedOption: null,
-                        placeholder: 'age'
-                    })
-                    break
-                default:
-                    this.setState({ options: [], selectedOption: null })
-            }
         }
     }
     render() {
@@ -160,10 +127,9 @@ class Select extends Component {
             <ReactSelect
                 value={selectedOption}
                 onChange={this.handleChange}
-                options={options || defOptions}
+                options={options}
                 styles={customStyles}
                 className={`${className || ''}`}
-                //classNamePrefix="react-select"
                 isSearchable={false}
                 width={width || '140px'}
                 placeholder={placeholder}

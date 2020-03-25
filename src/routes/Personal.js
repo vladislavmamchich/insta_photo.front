@@ -17,8 +17,6 @@ import Main from '../screens/Main'
 import Profile from '../screens/Profile'
 import Donate from '../screens/Donate'
 import User from '../screens/User'
-// import Admin from '../screens/admin'
-// import AdminUserInfo from '../screens/admin/AdminUserInfo'
 import Admin from './Admin'
 
 const NotFound = lazy(() => import('../components/service/NotFound'))
@@ -48,10 +46,6 @@ class Personal extends PureComponent {
                             <PrivateRoute path="/donate" component={Donate} />
                             <PrivateRoute path="/user/:id" component={User} />
                             <PrivateRoute path="/admin" component={Admin} />
-                            {/*<PrivateRoute
-                                path="/admin/user/:id"
-                                component={AdminUserInfo}
-                            />*/}
                             <Route path="/terms" component={Terms} />
                             <Route path="/privacy" component={Privacy} />
                             <Route render={() => <NotFound />} />

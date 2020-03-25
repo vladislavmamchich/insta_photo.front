@@ -93,28 +93,6 @@ export const t_register = ({ files, data }) => (dispatch, getState) => {
 				} catch (err) {
 					reject()
 				}
-
-				// toast.success(res.msg)
-				// dispatch(acts.a_updateRotation({ reset: true }))
-				// dispatch(acts.a_updateRegisterPhoto({ reset: true }))
-				// const { with_email, email, nickname, password } = JSON.parse(
-				// 	payload.get('data')
-				// )
-				// dispatch(
-				// 	acts.a_setModal({
-				// 		title: res.msg,
-				// 		message: `Your email/nickname: ${
-				// 			with_email ? email : nickname
-				// 		}, your password: ${password}.
-				// 		${
-				// 			with_email
-				// 				? 'When the profile passes admin moderation, an alert will be sent to your email'
-				// 				: 'Try to log in through time'
-				// 		}`,
-				// 		outClickForbidden: true,
-				// 		onClick: () => window.location.assign('/login')
-				// 	})
-				// )
 			},
 			failFunc: err => {
 				if (err.msg) {
@@ -325,48 +303,7 @@ export const t_images = payload => (dispatch, getState) => {
 		})
 	})
 }
-// export const t_favourites = ({ image, index }) => (dispatch, getState) => {
-// 	return new Promise((resolve, reject) => {
-// 		sendRequest({
-// 			r_path: paths.p_favourites,
-// 			method: 'post',
-// 			attr: { image_id: image._id },
-// 			success: ({ new_favourites }) => {
-// 				const {
-// 					profile: { data },
-// 					users: {
-// 						images,
-// 						filter: { showMe }
-// 					}
-// 				} = getState()
-// 				console.log('index', index)
-// 				const myFavouritesIndex = data.favourites.findIndex(
-// 					i => i._id === image._id
-// 				)
-// 				index = showMe ? index - 1 : index
-// 				const imagesFavouritesIndex = images.docs[
-// 					index
-// 				].favourites.indexOf(data._id)
-// 				const isMyFavourites =
-// 					myFavouritesIndex >= 0 && imagesFavouritesIndex >= 0
-// 				if (!isMyFavourites && !image.likes.includes(data._id)) {
-// 					socket.emit('like', { image_id: image._id })
-// 				}
-// 				dispatch(
-// 					acts.a_updateFavourites({
-// 						image_id: image._id,
-// 						new_favourites,
-// 						myFavouritesIndex,
-// 						index,
-// 						data,
-// 						imagesFavouritesIndex
-// 					})
-// 				)
-// 				resolve()
-// 			}
-// 		})
-// 	})
-// }
+
 export const t_addToFavourites = ({ image }) => (dispatch, getState) => {
 	return new Promise((resolve, reject) => {
 		sendRequest({
@@ -446,7 +383,6 @@ export const t_favouritesFromPage = payload => dispatch => {
 			method: 'post',
 			attr: payload,
 			success: ({ images }) => {
-				// console.log(images)
 				dispatch(acts.a_setFavourites({ images }))
 				resolve()
 			}
@@ -482,7 +418,6 @@ export const t_email = payload => dispatch => {
 			attr: payload,
 			success: ({ msg }) => {
 				toast.success(msg)
-				// dispatch(acts.a_setProfile(profile))
 				resolve()
 			},
 			failFunc: err => {
@@ -497,7 +432,6 @@ export const t_email = payload => dispatch => {
 	})
 }
 export const t_updateEmail = ({ emailToken, cb }) => dispatch => {
-	// return new Promise(resolve => {
 	sendRequest({
 		r_path: paths.p_updateEmail,
 		method: 'patch',
@@ -515,27 +449,7 @@ export const t_updateEmail = ({ emailToken, cb }) => dispatch => {
 			}
 		}
 	})
-	// })
 }
-// export const t_confirmEmail = payload => dispatch => {
-// 	return new Promise(resolve => {
-// 		sendRequest({
-// 			r_path: paths.p_confirmEmail,
-// 			method: 'post',
-// 			attr: payload,
-// 			success: ({ msg }) => {
-// 				toast.success(msg)
-// 			},
-// 			failFunc: err => {
-// 				if (err.msg) {
-// 					toast.warn(err.msg)
-// 				} else {
-// 					toast.warn(JSON.stringify(err))
-// 				}
-// 			}
-// 		})
-// 	})
-// }
 export const t_allowShareEmail = payload => dispatch => {
 	return new Promise(resolve => {
 		sendRequest({
@@ -582,8 +496,8 @@ export const t_getGeo = payload => dispatch => {
 	return new Promise(resolve => {
 		sendRequest({
 			r_path: paths.p_getGeo,
-			success: ({ countries, nationalities }) => {
-				dispatch(acts.a_setGeo({ countries, nationalities }))
+			success: data => {
+				dispatch(acts.a_setGeo(data))
 				resolve()
 			}
 		})
@@ -597,6 +511,8 @@ export const t_registerParticipant = payload => dispatch => {
 			attr: payload,
 			success: ({ msg, profile }) => {
 				dispatch(acts.a_setProfile(profile))
+				dispatch(acts.a_updateRotation({ reset: true }))
+				dispatch(acts.a_updateRegisterPhoto({ reset: true }))
 				resolve()
 			},
 			failFunc: err => {

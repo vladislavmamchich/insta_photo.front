@@ -58,8 +58,8 @@ export const a_setCaptcha = payload => ({
 	type: 'SET_CAPTCHA',
 	payload
 })
-export const a_deleteLastRegisterPhoto = payload => ({
-	type: 'DELETE_LAST_REGISTER_PHOTO',
+export const a_deleteRegisterPhoto = payload => ({
+	type: 'DELETE_REGISTER_PHOTO',
 	payload
 })
 export const a_pushUsersMainImages = payload => ({
@@ -70,10 +70,7 @@ export const a_like = payload => ({
 	type: 'LIKE',
 	payload
 })
-// export const a_updateFavourites = payload => ({
-// 	type: 'UPDATE_FAVOURITES',
-// 	payload
-// })
+
 export const a_addToFavourites = payload => ({
 	type: 'ADD_TO_FAVOURITES',
 	payload

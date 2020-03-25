@@ -1,11 +1,9 @@
 import React, { PureComponent } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheck } from '@fortawesome/free-solid-svg-icons'
-
-// import { toast } from 'react-toastify'
-// import i18next from 'i18next'
+import i18next from 'i18next'
 
 import { t_subscribe } from '../redux/tracks'
 
@@ -38,10 +36,10 @@ class Welcome extends PureComponent {
 					type specimen book. It has survived not only five centuries,
 					but also the leap into electronic typesetting.
 				</div>
-				<h1 className="my-4">how to use</h1>
+				<h1 className="my-4">{i18next.t('how to use')}</h1>
 				<div className="d-flex align-items-center justify-content-center w-75 row">
 					<div className="col-lg-5 col-sm-10 col-12 welcome-block">
-						<div className="title">observer</div>
+						<div className="title">{i18next.t('observer')}</div>
 						<div className="d-flex justify-content-between w-100">
 							<div className="m-2">
 								<FontAwesomeIcon icon={faCheck} />
@@ -76,16 +74,16 @@ class Welcome extends PureComponent {
 						</div>
 						<Button
 							onClick={() => this.subscribe()}
-							className="mt-2 w-50"
-							label="subscribe"
+							className="mt-2"
+							label={i18next.t('subscribe')}
 							loading={subscribing}
 						/>
 					</div>
 					<div className="col-lg-1 col-md-12 title-font text-uppercase text-center">
-						or
+						{i18next.t('or')}
 					</div>
 					<div className="col-lg-5 col-sm-10 col-12 welcome-block">
-						<div className="title">participant</div>
+						<div className="title">{i18next.t('participant')}</div>
 						<div className="d-flex justify-content-between w-100">
 							<div>
 								<FontAwesomeIcon icon={faCheck} />
@@ -108,16 +106,16 @@ class Welcome extends PureComponent {
 						</div>
 						<Button
 							onClick={() => history.push('/register')}
-							className="mt-2 w-50"
-							label="join us"
+							className="mt-2"
+							label={i18next.t('join us')}
 						/>
 					</div>
 				</div>
 				<div className="mt-3">
 					<Link className="text-uppercase" to="/login">
-						log in
+						{i18next.t('log in')}
 					</Link>{' '}
-					if already registered
+					{i18next.t('if already registered')}
 				</div>
 			</div>
 		)
@@ -134,4 +132,4 @@ const mapDispatchToProps = dispatch => ({
 	}
 })
 
-export default connect(mapStateToProps, mapDispatchToProps)(Welcome)
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Welcome))

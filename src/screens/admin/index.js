@@ -129,7 +129,7 @@ const Admin = ({ history }) => {
 				}
 			}
 		},
-		[dispatch]
+		[dispatch, history]
 	)
 
 	return (

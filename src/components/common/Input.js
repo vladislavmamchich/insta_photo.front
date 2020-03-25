@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import i18next from 'i18next'
 
 const Input = React.forwardRef((props, ref) => {
 	const {
@@ -34,7 +35,7 @@ const Input = React.forwardRef((props, ref) => {
 		<div className={`custom-input ${classNames || ''}`}>
 			<input
 				type={type || 'text'}
-				placeholder={placeholder || 'Enter value'}
+				placeholder={placeholder || i18next.t('Enter value')}
 				value={value}
 				onChange={e => changeValue(e)}
 				onBlur={() => (onBlur ? onBlur() : null)}

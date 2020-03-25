@@ -23,7 +23,7 @@ export default function profileReducer(
 			return { ...state, weightUnit: payload }
 		case 'SET_FAVOURITES':
 			if (state.favourites) {
-				if (state.favourites.page !== payload.images.page) {
+				if (state.favourites.page < payload.images.page) {
 					return {
 						...state,
 						favourites: {

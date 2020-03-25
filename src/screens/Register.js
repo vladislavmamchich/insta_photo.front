@@ -2,13 +2,12 @@ import React, { PureComponent, Fragment } from 'react'
 import { connect } from 'react-redux'
 import { Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import { CountryDropdown, RegionDropdown } from 'react-country-region-selector'
-// import i18next from 'i18next'
-// import Geonames from 'geonames.js'
+import i18next from 'i18next'
+// import piexif from 'piexifjs'
 
 import { a_updateRegisterPhoto, a_updateRotation } from '../redux/actions'
 import { t_checkUniq, t_register, t_emailRegister } from '../redux/tracks'
-import { forbiddenKeyCodes } from '../constants'
+import { forbiddenKeyCodes, getGeonames, ages } from '../constants'
 import { isValidEmail } from '../utils/helpers'
 
 import Input from '../components/common/Input'
@@ -19,12 +18,7 @@ import AddPhoto from '../components/AddPhoto'
 import Captcha from '../components/service/Captcha'
 import FullWindowLoader from '../components/service/FullWindowLoader'
 
-// const geonames = new Geonames({
-// 	username: 'myusername',
-// 	lan: 'ru',
-// 	encoding: 'JSON'
-// })
-// const geonames = getGeonames()
+const geonames = getGeonames()
 
 class Register extends PureComponent {
 	state = {
@@ -38,7 +32,6 @@ class Register extends PureComponent {
 		repeat_password: '',
 		country: '',
 		region: '',
-		locality: '',
 		height: '',
 		weight: '',
 		chest: '',
@@ -50,48 +43,61 @@ class Register extends PureComponent {
 		uniq: true,
 		registration: false,
 		captcha: '',
-		imagesArray: []
-		// countries: [],
-		// regions: []
+		imagesArray: [],
+		countries: [],
+		regions: []
 	}
 
 	async componentDidMount() {
 		const el = document.querySelector('.logo')
 		el.scrollIntoView({ block: 'start', behavior: 'smooth' })
-		// try {
-		// 	let countries = await geonames.countryInfo({})
-		// 	// countries = countries.geonames.map(c => {
-		// 	// 	return {
-		// 	// 		label: c.countryName,
-		// 	// 		value: c.countryCode,
-		// 	// 		id: c.geonameId
-		// 	// 	}
-		// 	// })
-		// 	// this.setState({ countries })
-		// 	console.log('countries', countries)
-		// 	const states = await geonames.children({
-		// 		geonameId: countries.geonames[229].geonameId
-		// 	})
-		// 	console.log('states', states)
-		// 	const regions = await geonames.children({
-		// 		geonameId: states.geonames[19].geonameId
-		// 	})
-		// 	console.log('regions', regions)
-		// 	const cities = await geonames.children({
-		// 		geonameId: regions.geonames[0].geonameId
-		// 	})
-		// 	console.log(cities)
-		// } catch (err) {
-		// 	console.error(err)
-		// }
+		try {
+			let countries = await geonames.countryInfo({})
+			countries = countries.geonames.map(c => {
+				return {
+					label: c.countryName,
+					value: c.geonameId
+				}
+			})
+			this.setState({ countries })
+		} catch (err) {
+			console.error(err)
+		}
 	}
-
-	// componentDidUpdate(prevProps, prevState) {
-	// 	console.log(prevState, prevProps)
-	// }
 
 	handleImageUpload = acceptedFiles => {
 		const { updateRegisterPhoto } = this.props
+		// console.dir(acceptedFiles[0])
+		// var reader = new FileReader()
+		// reader.onloadend = function() {
+		// 	console.log('RESULT', reader.result)
+		// 	let exif = piexif.load(reader.result)
+		// 	console.log(exif)
+		// 	// const el = piexif.remove(reader.result)
+		// 	// exifObj = piexif.load(el)
+		// 	// console.log(exifObj)
+		// 	exif['0th'][piexif.ImageIFD.Orientation] = 5 // modifying orientation
+		// 	var dump = piexif.dump(exif)
+		// 	var inserted = piexif.insert(dump, reader.result)
+		// 	var modifiedExif = piexif.load(inserted) // <== error thrown here
+		// 	console.log(modifiedExif)
+		// 	console.log(inserted)
+		// 	const imgElem = document.querySelector('#test')
+		// 	setTimeout(() => {
+		// 		imgElem.setAttribute('src', inserted)
+		// 	}, 2000)
+
+		// 	// const base64File = reader.result
+		// 	// const i = base64File.indexOf('base64,')
+		// 	// const buffer = Buffer.from(base64File.slice(i + 7), 'base64')
+		// 	// const file = new File(buffer, acceptedFiles[0].name, {
+		// 	// 	type: 'image/jpeg',
+		// 	// 	lastModified: new Date()
+		// 	// })
+		// 	// console.log(file)
+		// 	// updateRegisterPhoto({ index: 0, value: file })
+		// }
+		// reader.readAsDataURL(acceptedFiles[0])
 		updateRegisterPhoto({ index: 0, value: acceptedFiles[0] })
 	}
 
@@ -119,11 +125,11 @@ class Register extends PureComponent {
 			let fields = { ...this.state }
 			let err = false
 			if (fields.with_email && !isValidEmail(fields.email)) {
-				toast.warning('Enter valid email')
+				toast.warning(i18next.t('Enter valid email'))
 				err = true
 			}
 			if (fields.with_email && fields.email.length > 40) {
-				toast.warning('Email max length is 40 characters')
+				toast.warning(i18next.t('Email max length is 40 characters'))
 				err = true
 			}
 			if (
@@ -131,7 +137,9 @@ class Register extends PureComponent {
 				(fields.nickname.length < 3 || fields.nickname.length > 20)
 			) {
 				toast.warning(
-					'Nickname min length is 3 characters, max length is 20 characters'
+					i18next.t(
+						'Nickname min length is 3 characters, max length is 20 characters'
+					)
 				)
 				err = true
 			}
@@ -141,62 +149,62 @@ class Register extends PureComponent {
 					fields.secret_word.length > 20)
 			) {
 				toast.warning(
-					'Secret word min length is 3 characters, max length is 20 characters'
+					i18next.t(
+						'Secret word min length is 3 characters, max length is 20 characters'
+					)
 				)
 				err = true
 			}
 			if (fields.password.length < 6 || fields.password.length > 12) {
 				toast.warning(
-					'Password min length is 6 characters, max length is 12 characters'
+					i18next.t(
+						'Password min length is 6 characters, max length is 12 characters'
+					)
 				)
 				err = true
 			}
 			if (fields.password !== fields.repeat_password) {
-				toast.warning('Passwords do not match')
+				toast.warning(i18next.t('Passwords do not match'))
 				err = true
 			}
-			if (fields.country.length === 0) {
-				toast.warning('Choose country')
+			if (!fields.country) {
+				toast.warning(i18next.t('Choose country'))
 				err = true
 			}
-			if (fields.region.length === 0) {
-				toast.warning('Choose region')
+			if (!fields.region) {
+				toast.warning(i18next.t('Choose region'))
 				err = true
 			}
-			if (fields.locality.length === 0) {
-				toast.warning('Choose locality')
+			if (!fields.nationality) {
+				toast.warning(i18next.t('Choose nationality'))
 				err = true
 			}
-			if (fields.nationality.length === 0) {
-				toast.warning('Choose nationality')
-				err = true
-			}
-			if (fields.age.length === 0) {
-				toast.warning('Choose age')
+			if (!fields.age) {
+				toast.warning(i18next.t('Choose age'))
 				err = true
 			}
 			if (fields.height < 10 || fields.height > 300) {
-				toast.warning('Min height value is 10, max - 300')
+				toast.warning(i18next.t('Min height value is 10, max - 300'))
 				err = true
 			}
 			if (fields.chest < 10 || fields.chest > 300) {
-				toast.warning('Min chest value is 10, max - 300')
+				toast.warning(i18next.t('Min chest value is 10, max - 300'))
 				err = true
 			}
 			if (fields.waist < 10 || fields.waist > 300) {
-				toast.warning('Min waist value is 10, max - 300')
+				toast.warning(i18next.t('Min waist value is 10, max - 300'))
 				err = true
 			}
 			if (fields.thighs < 10 || fields.thighs > 300) {
-				toast.warning('Min thighs value is 10, max - 300')
+				toast.warning(i18next.t('Min thighs value is 10, max - 300'))
 				err = true
 			}
 			if (fields.weight < 10 || fields.weight > 300) {
-				toast.warning('Min weight value is 10, max - 300')
+				toast.warning(i18next.t('Min weight value is 10, max - 300'))
 				err = true
 			}
 			if (registerPhotos.length === 0) {
-				toast.warning('Choose at least one image')
+				toast.warning(i18next.t('Choose at least one image'))
 				err = true
 			}
 			if (!err) {
@@ -208,13 +216,18 @@ class Register extends PureComponent {
 				files.append('rotations', JSON.stringify(rotations))
 				fields.uniq = undefined
 				fields.registration = undefined
-				const data = {
-					...fields,
+				fields.countries = undefined
+				fields.regions = undefined
+				let data = {
 					height_unit: heightUnit,
 					weight_unit: weightUnit
 				}
 				if (fields.with_email) {
 					fields.nickname = undefined
+					data = {
+						...data,
+						...fields
+					}
 					files.append('data', JSON.stringify(data))
 					this.setState({ registration: true })
 					await emailRegister(files)
@@ -223,24 +236,13 @@ class Register extends PureComponent {
 					fields.email = undefined
 					fields.allow_share_email = undefined
 					fields.secret_word = undefined
+					data = {
+						...data,
+						...fields
+					}
 					this.setState({ registration: true })
 					await register({ files, data })
 				}
-				// const files = new FormData()
-				// const l = registerPhotos.length
-				// for (let i = 0; i < l; i++) {
-				// 	files.append('files', registerPhotos[i])
-				// }
-				// fields.uniq = undefined
-				// fields.registration = undefined
-				// const data = {
-				// 	...fields,
-				// 	height_unit: heightUnit,
-				// 	weight_unit: weightUnit
-				// }
-				// files.append('rotations', JSON.stringify(rotations))
-				// this.setState({ registration: true })
-				// await register({ files, data })
 			}
 		} catch (err) {
 			this.setState({ registration: false })
@@ -253,48 +255,18 @@ class Register extends PureComponent {
 		updateRotation({ index: 0, value: newRotation })
 	}
 
-	// selectCountry = async country => {
-	// 	const { countries } = this.state
-	// 	const countryObj = countries.find(c => c.value === country)
-	// 	let regions = []
-	// 	if (countryObj) {
-	// 		const geonameId = countryObj.id
-	// 		const states = await geonames.children({
-	// 			geonameId
-	// 		})
-	// 		console.log(states)
-	// 		regions = states.geonames.map(c => {
-	// 			return {
-	// 				label: c.adminName1,
-	// 				value: c.toponymName,
-	// 				id: c.geonameId
-	// 			}
-	// 		})
-	// 	}
-	// 	this.setState({ country, regions })
-	// }
-
-	// selectRegion = async region => {
-	// 	const { regions } = this.state
-	// 	const regionObj = regions.find(r => r.value === region)
-	// 	let cities = []
-	// 	if (regionObj) {
-	// 		console.log(regionObj, regions)
-	// 		const geonameId = regionObj.id
-	// 		const states = await geonames.children({
-	// 			geonameId
-	// 		})
-	// 		console.log(states)
-	// 		// cities = states.geonames.map(c => {
-	// 		// 	return {
-	// 		// 		label: c.adminName1,
-	// 		// 		value: c.regionCode,
-	// 		// 		id: c.geonameId
-	// 		// 	}
-	// 		// })
-	// 	}
-	// 	this.setState({ region, cities })
-	// }
+	selectCountry = async geonameId => {
+		const states = await geonames.children({
+			geonameId
+		})
+		const regions = states.geonames.map(c => {
+			return {
+				label: c.name,
+				value: c.geonameId
+			}
+		})
+		this.setState({ country: geonameId, regions })
+	}
 
 	render() {
 		const {
@@ -306,25 +278,23 @@ class Register extends PureComponent {
 			operations,
 			uniq,
 			country,
-			region,
 			registration,
-			nationality,
-			locality,
-			imagesArray
-			// countries,
-			// regions
+			imagesArray,
+			countries,
+			regions
 		} = this.state
 		const { registerPhotos, rotations } = this.props
 		const addPhoto =
 			registerPhotos.length < 5 &&
 			registerPhotos.length - 1 === imagesArray.length
-		const regionLabel = country === 'United States' ? 'state' : 'region'
+		const regionLabel =
+			country === 6252001 ? i18next.t('state') : i18next.t('region')
 		return (
 			<div className="px-2 px-lg-5 container">
 				<div className="mt-5 registration">
 					<div className="px-0 px-md-4">
 						<h1 className="text-uppercase h2 text-center mb-4">
-							Participant registration
+							{i18next.t('Participant registration')}
 						</h1>
 						<div className="row">
 							<div className="col-lg-3">
@@ -352,7 +322,9 @@ class Register extends PureComponent {
 											onBlur={() => this.checkUniq()}
 											label={
 												nickname && !with_email && !uniq
-													? 'User with this nickname already exist'
+													? i18next.t(
+															'User with this nickname already exist'
+													  )
 													: null
 											}
 										/>
@@ -379,11 +351,13 @@ class Register extends PureComponent {
 												})
 											}
 											type="email"
-											placeholder="email"
+											placeholder={i18next.t('email')}
 											onBlur={() => this.checkUniq()}
 											label={
 												email && with_email && !uniq
-													? 'User with this email already exist'
+													? i18next.t(
+															'User with this email already exist'
+													  )
 													: null
 											}
 										/>
@@ -405,7 +379,9 @@ class Register extends PureComponent {
 												/>
 												<span className="checkbox-icon checkbox-icon--rect" />
 												<span className="ml-2">
-													allow share my email
+													{i18next.t(
+														'allow share my email'
+													)}
 												</span>
 											</label>
 										</div>
@@ -416,7 +392,9 @@ class Register extends PureComponent {
 													secret_word: value
 												})
 											}
-											placeholder="secret word"
+											placeholder={i18next.t(
+												'secret word'
+											)}
 										/>
 									</Fragment>
 								)}
@@ -427,7 +405,7 @@ class Register extends PureComponent {
 											password: value
 										})
 									}
-									placeholder="password"
+									placeholder={i18next.t('password')}
 									type={show_pass ? 'text' : 'password'}
 									autoComplete="new-password"
 								/>
@@ -447,7 +425,7 @@ class Register extends PureComponent {
 										/>
 										<span className="checkbox-icon checkbox-icon--rect" />
 										<span className="ml-2">
-											show password
+											{i18next.t('show password')}
 										</span>
 									</label>
 								</div>
@@ -458,7 +436,7 @@ class Register extends PureComponent {
 											repeat_password: value
 										})
 									}
-									placeholder="repeat password"
+									placeholder={i18next.t('repeat password')}
 									type={show_pass ? 'text' : 'password'}
 									autoComplete="new-password"
 								/>
@@ -496,97 +474,59 @@ class Register extends PureComponent {
 						<div className="row">
 							<div className="col-lg-4 col-md-6 d-flex flex-column flex-md-row justify-content-between">
 								<div className="mr-4">
-									{/*<Select
+									<Select
 										className="left-asterisk"
-										onChange={country =>
-											this.selectCountry(country)
+										onChange={({ value }) =>
+											this.selectCountry(value)
 										}
 										options={[
-											{ label: 'country', value: '' },
+											{
+												label: i18next.t('country'),
+												value: ''
+											},
 											...countries
 										]}
 									/>
 									<Select
 										className="left-asterisk"
-										onChange={region =>
-											this.selectRegion(region)
+										onChange={({ value }) =>
+											this.setState({ region: value })
 										}
 										options={[
 											{ label: regionLabel, value: '' },
 											...regions
 										]}
-										disabled={!country}
-									/>*/}
-									<div className="position-relative">
-										<div className="left-asterisk">
-											<CountryDropdown
-												value={country}
-												onChange={country =>
-													this.setState({
-														country,
-														region: '',
-														locality: ''
-													})
-												}
-												classes="country-region-select"
-												defaultOptionLabel="country"
-											/>
-										</div>
-									</div>
-									<div className="position-relative">
-										<div className="left-asterisk">
-											<RegionDropdown
-												country={country}
-												value={region}
-												onChange={region =>
-													this.setState({
-														region
-													})
-												}
-												classes="country-region-select"
-												defaultOptionLabel={regionLabel}
-												disabled={!country}
-												blankOptionLabel={regionLabel}
-											/>
-										</div>
-									</div>
-									<div className="position-relative">
-										<div className="left-asterisk">
-											<RegionDropdown
-												country={country}
-												value={locality}
-												onChange={locality =>
-													this.setState({
-														locality
-													})
-												}
-												classes="country-region-select"
-												defaultOptionLabel="locality"
-												disabled={!region}
-												blankOptionLabel="locality"
-											/>
-										</div>
-									</div>
+										isDisabled={!country}
+									/>
 								</div>
 								<div>
-									<div className="position-relative">
-										<div className="left-asterisk">
-											<CountryDropdown
-												value={nationality}
-												onChange={nationality =>
-													this.setState({
-														nationality
-													})
-												}
-												classes="country-region-select"
-												defaultOptionLabel="nationality"
-											/>
-										</div>
-									</div>
 									<Select
-										type="age"
 										className="left-asterisk"
-										onChange={age => this.setState({ age })}
+										onChange={({ value }) =>
+											this.setState({
+												nationality: value
+											})
+										}
+										options={[
+											{
+												label: i18next.t('nationality'),
+												value: ''
+											},
+											...countries
+										]}
+									/>
+									<Select
+										className="left-asterisk"
+										onChange={({ value }) =>
+											this.setState({ age: value })
+										}
+										options={[
+											{
+												label: i18next.t('age'),
+												value: ''
+											},
+											...ages
+										]}
 									/>
 								</div>
 							</div>
@@ -598,7 +538,7 @@ class Register extends PureComponent {
 											changeHandler={height =>
 												this.setState({ height })
 											}
-											placeholder="height"
+											placeholder={i18next.t('height')}
 											type="number"
 											min={1}
 											max={300}
@@ -614,7 +554,7 @@ class Register extends PureComponent {
 											changeHandler={chest =>
 												this.setState({ chest })
 											}
-											placeholder="chest"
+											placeholder={i18next.t('chest')}
 											type="number"
 											min={1}
 											max={300}
@@ -632,7 +572,7 @@ class Register extends PureComponent {
 											changeHandler={waist =>
 												this.setState({ waist })
 											}
-											placeholder="waist"
+											placeholder={i18next.t('waist')}
 											type="number"
 											min={1}
 											max={300}
@@ -648,7 +588,7 @@ class Register extends PureComponent {
 											changeHandler={thighs =>
 												this.setState({ thighs })
 											}
-											placeholder="thighs"
+											placeholder={i18next.t('thighs')}
 											type="number"
 											min={1}
 											max={300}
@@ -666,7 +606,7 @@ class Register extends PureComponent {
 											changeHandler={weight =>
 												this.setState({ weight })
 											}
-											placeholder="weight"
+											placeholder={i18next.t('weight')}
 											type="number"
 											min={1}
 											max={300}
@@ -694,7 +634,9 @@ class Register extends PureComponent {
 										/>
 										<span className="checkbox-icon" />
 										<span className="ml-2">
-											I did some plastic operations
+											{i18next.t(
+												'I did some plastic operations'
+											)}
 										</span>
 									</label>
 								</div>
@@ -711,7 +653,9 @@ class Register extends PureComponent {
 										/>
 										<span className="checkbox-icon" />
 										<span className="ml-2">
-											I never did plastic operations
+											{i18next.t(
+												'I never did plastic operations'
+											)}
 										</span>
 									</label>
 								</div>
@@ -720,10 +664,14 @@ class Register extends PureComponent {
 						<div className="row">
 							<div className="col-12 mt-5 mb-3">
 								<h1 className="text-uppercase h2 text-center">
-									photos
+									{i18next.t('photos')}
 								</h1>
 								<p className="text-center">
-									(add at least 1 photo, maximum - 5)
+									(
+									{i18next.t(
+										'add at least 1 photo, maximum - 5'
+									)}
+									)
 								</p>
 							</div>
 							<div className="col-lg-2 mb-3">
@@ -736,7 +684,9 @@ class Register extends PureComponent {
 											type="checkbox"
 										/>
 										<span className="checkbox-icon checkbox-icon--rect" />
-										<span className="ml-2">main photo</span>
+										<span className="ml-2">
+											{i18next.t('main photo')}
+										</span>
 									</label>
 								</div>
 							</div>
@@ -749,9 +699,11 @@ class Register extends PureComponent {
 								>
 									{registerPhotos[0] && (
 										<img
+											// id="test"
 											src={URL.createObjectURL(
 												registerPhotos[0]
 											)}
+											// src=""
 											alt="img"
 										/>
 									)}
@@ -813,26 +765,26 @@ class Register extends PureComponent {
 									className="mb-5"
 									href="#!"
 								>
-									add more
+									{i18next.t('add more')}
 								</a>
 							</div>
 						)}
 						<div className="row">
-							<div className="col-lg-4 col-md-4 col-6">
+							<div className="col-lg-4 col-md-5 col-6">
 								<Captcha />
 								<Input
 									classNames="ml-0 mb-3"
 									changeHandler={captcha =>
 										this.setState({ captcha })
 									}
-									placeholder="captcha"
+									placeholder={i18next.t('captcha')}
 								/>
 							</div>
 						</div>
 						<div className="d-flex align-items-center justify-content-between">
 							<Button
 								className="text-uppercase"
-								label="submit"
+								label={i18next.t('submit')}
 								loading={registration}
 								onClick={() => this.register()}
 							/>
@@ -841,9 +793,9 @@ class Register extends PureComponent {
 									className="text-uppercase text-underline"
 									to="/login"
 								>
-									log in
+									{i18next.t('log in')}
 								</Link>{' '}
-								if already registered
+								{i18next.t('if already registered')}
 							</div>
 						</div>
 						{registration && <FullWindowLoader />}

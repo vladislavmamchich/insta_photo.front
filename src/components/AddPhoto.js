@@ -1,18 +1,10 @@
 import React, { PureComponent } from 'react'
 import { connect } from 'react-redux'
-// import { Link } from 'react-router-dom'
-
-// import { toast } from 'react-toastify'
-// import i18next from 'i18next'
-
-// import { t_login } from '../../redux/tracks'
 import {
 	a_updateRegisterPhoto,
 	a_updateRotation,
-	a_deleteLastRegisterPhoto
+	a_deleteRegisterPhoto
 } from '../redux/actions'
-// import Button from '../components/common/Button'
-// import Select from '../components/common/Select'
 import ImageUpload from './common/ImageUpload'
 
 class AddPhoto extends PureComponent {
@@ -33,13 +25,13 @@ class AddPhoto extends PureComponent {
 	deleteImage = () => {
 		const {
 			close,
-			deleteLastRegisterPhoto,
+			deleteRegisterPhoto,
 			registerPhotos,
 			index,
 			updateRotation
 		} = this.props
 		if (registerPhotos.length > index) {
-			deleteLastRegisterPhoto()
+			deleteRegisterPhoto(index)
 			updateRotation({ index, value: 0 })
 		}
 		close()
@@ -97,8 +89,8 @@ const mapDispatchToProps = dispatch => ({
 	updateRegisterPhoto: payload => {
 		dispatch(a_updateRegisterPhoto(payload))
 	},
-	deleteLastRegisterPhoto: () => {
-		dispatch(a_deleteLastRegisterPhoto())
+	deleteRegisterPhoto: payload => {
+		dispatch(a_deleteRegisterPhoto(payload))
 	},
 	updateRotation: payload => {
 		dispatch(a_updateRotation(payload))

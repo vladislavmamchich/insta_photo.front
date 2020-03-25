@@ -23,23 +23,21 @@ class FavouriteImage extends PureComponent {
 		}
 	}
 
-	// componentDidMount() {
-	// 	window.addEventListener('beforeunload', this.onBeforeUnload)
-	// }
+	componentDidMount() {
+		window.addEventListener('beforeunload', this.onBeforeUnload)
+	}
 
-	// onBeforeUnload = e => {
-	// 	// e.preventDefault()
-	// 	// e.returnValue = `Are you sure you want to leave?`
-	// 	// console.log(this.state.in_favourites)
-	// 	if (!this.state.in_favourites) {
-	// 		const { removeFromFavourites, image } = this.props
-	// 		removeFromFavourites({ image })
-	// 	}
-	// 	// e.returnValue = `Are you sure you want to leave?`
-	// }
+	onBeforeUnload = e => {
+		e.preventDefault()
+		if (!this.state.in_favourites) {
+			const { removeFromFavourites, image } = this.props
+			removeFromFavourites({ image: image.original })
+		}
+		// e.returnValue = `Are you sure you want to leave?`
+	}
 
 	componentWillUnmount() {
-		// window.removeEventListener('beforeunload', this.onBeforeUnload)
+		window.removeEventListener('beforeunload', this.onBeforeUnload)
 		if (!this.state.in_favourites) {
 			const { removeFromFavourites, image } = this.props
 			removeFromFavourites({ image: image.original })

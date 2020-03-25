@@ -10,7 +10,7 @@ export const sex = [
 	{ label: 'female', value: 'female' },
 	{ label: 'male', value: 'male' }
 ]
-export let ages = [{ label: 'all ages', value: 'all' }]
+export let ages = []
 ;(() => {
 	for (let i = 16; i <= 90; i++) {
 		ages.push({ label: i, value: i })

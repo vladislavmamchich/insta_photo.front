@@ -48,7 +48,7 @@ class ResetPassword extends PureComponent {
 				</div>
 				<Input
 					changeHandler={email => this.setState({ email })}
-					placeholder="email"
+					placeholder={i18next.t('email')}
 					classNames="ml-0"
 					type="email"
 				/>
@@ -56,24 +56,24 @@ class ResetPassword extends PureComponent {
 					changeHandler={secret_word =>
 						this.setState({ secret_word })
 					}
-					placeholder="secret word"
+					placeholder={i18next.t('secret word')}
 					classNames="ml-0 my-2"
 				/>
 				<Captcha />
 				<Input
 					classNames="ml-0 mb-3"
 					changeHandler={captcha => this.setState({ captcha })}
-					placeholder="captcha"
+					placeholder={i18next.t('captcha')}
 				/>
 				<Button
 					onClick={() => this.submit()}
 					loading={submitting}
-					label="submit"
+					label={i18next.t('submit')}
 				/>
 				<div className="mx-auto mt-4">
-					<Link to="/">signup</Link>
+					<Link to="/">{i18next.t('signup')}</Link>
 					<span>&nbsp;|&nbsp;</span>
-					<Link to="/login">login</Link>
+					<Link to="/login">{i18next.t('login')}</Link>
 				</div>
 			</div>
 		)

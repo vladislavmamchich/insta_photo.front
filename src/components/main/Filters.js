@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
+import i18next from 'i18next'
 // import {
 // 	CountryDropdown,
 // 	CountryRegionData
@@ -7,31 +8,32 @@ import { useSelector, useDispatch } from 'react-redux'
 // import { NavLink } from 'react-router-dom'
 
 // import { toast } from 'react-toastify'
-// import i18next from 'i18next'
 // import MainImage from '../components/main/MainImage'
 
 // import { socket } from '../utils/socket'
 import { a_setFilter, a_clearFilter } from '../../redux/actions'
 // import { t_getCountries } from '../../redux/tracks'
-import { ages } from '../../constants'
+import { getGeonames, ages } from '../../constants'
 
 import Select from '../../components/common/Select'
-import GeoSelect from '../../components/common/GeoSelect'
+// import Select from '../../components/common/Select'
 import Loader from '../../components/service/Loader'
 
-// const shortCodesFromNames = {}
-// CountryRegionData.forEach(a => (shortCodesFromNames[a[0]] = a[1]))
+const geonames = getGeonames()
 
 const Filters = () => {
 	const dispatch = useDispatch()
-	const [selectedCountry, selectCountry] = useState({
-		label: 'all countries',
-		value: 'all'
-	})
-	const [selectedRegion, selectRegion] = useState({
-		label: 'all regions',
-		value: 'all'
-	})
+	// const [selectedCountry, selectCountry] = useState({
+	// 	label: i18next.t('all countries'),
+	// 	value: ''
+	// })
+	// const [selectedRegion, selectRegion] = useState({
+	// 	label: i18next.t('all regions'),
+	// 	value: ''
+	// })
+	const [countries, setCountries] = useState([])
+	const [nationalities, setNationalities] = useState([])
+	const [regions, setRegions] = useState([])
 
 	const {
 		filter: {
@@ -42,17 +44,13 @@ const Filters = () => {
 			age,
 			nationality,
 			country,
-			region,
-			locality
+			region
 		},
-		countries,
-		nationalities
+		countriesObj,
+		countriesGeonamesIds,
+		nationalitiesGeonamesIds
 	} = useSelector(store => store.users)
 
-	// const getShortCodes = countries =>
-	// 	countries.map(c => {
-	// 		return shortCodesFromNames[c.value]
-	// 	})
 	const { role } = useSelector(store => store.profile.data)
 	// const useDidUpdateEffect = (fn, inputs) => {
 	// 	const didMountRef = useRef(false)
@@ -62,16 +60,72 @@ const Filters = () => {
 	// 		else didMountRef.current = true
 	// 	}, inputs)
 	// }
+	const filterGeo = async () => {
+		const all = await geonames.countryInfo({})
+		let localCountries = [],
+			localNationalities = []
+		for (const c of all.geonames) {
+			if (nationalitiesGeonamesIds.includes(c.geonameId)) {
+				localNationalities.push({
+					label: c.countryName,
+					value: c.geonameId
+				})
+			}
+			if (countriesGeonamesIds.includes(c.geonameId)) {
+				localCountries.push({
+					label: c.countryName,
+					value: c.geonameId
+				})
+			}
+		}
+		setNationalities(localNationalities)
+		setCountries(localCountries)
+	}
+
 	useEffect(() => {
+		filterGeo()
 		return () => {
 			dispatch(a_clearFilter())
 		}
 	}, [])
+
+	const selectCountryHandler = async country => {
+		// selectCountry(country)
+		// selectRegion({
+		// 	label: i18next.t('all regions'),
+		// 	value: ''
+		// })
+		dispatch(
+			a_setFilter({
+				field: 'country',
+				value: country.value || ''
+			})
+		)
+		dispatch(
+			a_setFilter({
+				field: 'region',
+				value: ''
+			})
+		)
+		if (country.value) {
+			let states = await geonames.children({
+				geonameId: country.value
+			})
+			states = states.geonames.filter(s =>
+				countriesObj[country.value].includes(s.geonameId)
+			)
+			const regions = states.map(s => {
+				return {
+					label: s.name,
+					value: s.geonameId
+				}
+			})
+			setRegions(regions)
+		}
+	}
+
 	const regionLabel =
-		country === 'United States' ? 'all states' : 'all regions'
-	const regions =
-		selectedCountry.value !== 'all' ? selectedCountry.regions : []
-	const cities = selectedRegion.value !== 'all' ? selectedRegion.cities : []
+		country === 6252001 ? i18next.t('all states') : i18next.t('all regions')
 	return (
 		<div className="prod-options d-flex flex-column flex-md-row">
 			<div className="d-flex flex-column justify-content-start mr-5">
@@ -87,7 +141,7 @@ const Filters = () => {
 						)
 					}
 				>
-					show me
+					{i18next.t('show me')}
 				</button>
 				<button
 					className={`btn-link text-left ${
@@ -102,50 +156,28 @@ const Filters = () => {
 						)
 					}
 				>
-					show favourites
+					{i18next.t('show favourites')}
 				</button>
 				<button
 					className="btn-link text-left"
 					onClick={() => dispatch(a_clearFilter())}
 				>
-					clear filters
+					{i18next.t('clear filters')}
 				</button>
 			</div>
 			<div className="d-flex flex-row justify-content-start flex-wrap mr-5">
 				<div className="d-flex flex-column mr-2">
 					<div className="d-flex align-items-baseline">
-						{countries ? (
-							<GeoSelect
-								onChange={country => {
-									selectCountry(country)
-									selectRegion({
-										label: 'all regions',
-										value: 'all'
-									})
-									dispatch(
-										a_setFilter({
-											field: 'country',
-											value: country.value || 'all'
-										})
-									)
-									dispatch(
-										a_setFilter({
-											field: 'region',
-											value: 'all'
-										})
-									)
-									dispatch(
-										a_setFilter({
-											field: 'locality',
-											value: 'all'
-										})
-									)
-								}}
+						{countriesGeonamesIds ? (
+							<Select
+								onChange={country =>
+									selectCountryHandler(country)
+								}
 								selected={country}
 								options={[
 									{
-										label: 'all countries',
-										value: 'all'
+										label: i18next.t('all countries'),
+										value: ''
 									},
 									...countries
 								]}
@@ -159,13 +191,13 @@ const Filters = () => {
 					</div>
 					<div className="d-flex align-items-baseline">
 						{countries ? (
-							<GeoSelect
+							<Select
 								onChange={region => {
-									selectRegion(region)
+									// selectRegion(region)
 									dispatch(
 										a_setFilter({
 											field: 'region',
-											value: region.value || 'all'
+											value: region.value || ''
 										})
 									)
 								}}
@@ -173,39 +205,11 @@ const Filters = () => {
 								options={[
 									{
 										label: regionLabel,
-										value: 'all'
+										value: ''
 									},
 									...regions
 								]}
-								isDisabled={country === 'all'}
-							/>
-						) : (
-							<div className="d-flex px-2">
-								loading&nbsp;
-								<Loader style={{ fontSize: 14 }} />
-							</div>
-						)}
-					</div>
-					<div className="d-flex align-items-baseline">
-						{countries ? (
-							<GeoSelect
-								onChange={locality =>
-									dispatch(
-										a_setFilter({
-											field: 'locality',
-											value: locality.value || 'all'
-										})
-									)
-								}
-								selected={locality}
-								options={[
-									{
-										label: 'all localities',
-										value: 'all'
-									},
-									...cities
-								]}
-								isDisabled={region === 'all'}
+								isDisabled={country === ''}
 							/>
 						) : (
 							<div className="d-flex px-2">
@@ -217,21 +221,21 @@ const Filters = () => {
 				</div>
 				<div>
 					<div className="d-flex align-items-baseline">
-						{nationalities ? (
-							<GeoSelect
-								onChange={nationality => {
+						{nationalitiesGeonamesIds ? (
+							<Select
+								onChange={({ value }) => {
 									dispatch(
 										a_setFilter({
 											field: 'nationality',
-											value: nationality.value || 'all'
+											value
 										})
 									)
 								}}
 								selected={nationality}
 								options={[
 									{
-										label: 'all nationalities',
-										value: 'all'
+										label: i18next.t('all nationalities'),
+										value: ''
 									},
 									...nationalities
 								]}
@@ -244,17 +248,19 @@ const Filters = () => {
 						)}
 					</div>
 					<Select
-						onChange={age =>
+						onChange={({ value }) =>
 							dispatch(
 								a_setFilter({
 									field: 'age',
-									value: age
+									value
 								})
 							)
 						}
-						width="90px"
 						selected={age}
-						options={ages}
+						options={[
+							{ label: i18next.t('all ages'), value: '' },
+							...ages
+						]}
 					/>
 				</div>
 			</div>
@@ -280,7 +286,7 @@ const Filters = () => {
 								type="checkbox"
 							/>
 							<span className="checkbox-icon" />
-							<span className="ml-2">date</span>
+							<span className="ml-2">{i18next.t('date')}</span>
 						</label>
 					</div>
 					<div className="custom-checkbox mr-2">
@@ -298,7 +304,7 @@ const Filters = () => {
 								type="checkbox"
 							/>
 							<span className="checkbox-icon" />
-							<span className="ml-2">likes</span>
+							<span className="ml-2">{i18next.t('likes')}</span>
 						</label>
 					</div>
 					<div className="custom-checkbox mr-2">
@@ -316,7 +322,7 @@ const Filters = () => {
 								type="checkbox"
 							/>
 							<span className="checkbox-icon" />
-							<span className="ml-2">chest</span>
+							<span className="ml-2">{i18next.t('chest')}</span>
 						</label>
 					</div>
 					<div className="custom-checkbox mr-2">
@@ -334,7 +340,7 @@ const Filters = () => {
 								type="checkbox"
 							/>
 							<span className="checkbox-icon" />
-							<span className="ml-2">height</span>
+							<span className="ml-2">{i18next.t('height')}</span>
 						</label>
 					</div>
 					<div className="custom-checkbox mr-2">
@@ -352,7 +358,7 @@ const Filters = () => {
 								type="checkbox"
 							/>
 							<span className="checkbox-icon" />
-							<span className="ml-2">waist</span>
+							<span className="ml-2">{i18next.t('waist')}</span>
 						</label>
 					</div>
 					<div className="custom-checkbox mr-2">
@@ -370,7 +376,7 @@ const Filters = () => {
 								type="checkbox"
 							/>
 							<span className="checkbox-icon" />
-							<span className="ml-2">weight</span>
+							<span className="ml-2">{i18next.t('weight')}</span>
 						</label>
 					</div>
 					<div className="custom-checkbox mr-2">
@@ -388,7 +394,7 @@ const Filters = () => {
 								type="checkbox"
 							/>
 							<span className="checkbox-icon" />
-							<span className="ml-2">thighs</span>
+							<span className="ml-2">{i18next.t('thighs')}</span>
 						</label>
 					</div>
 				</div>
