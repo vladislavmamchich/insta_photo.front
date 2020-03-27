@@ -1,10 +1,9 @@
-// import { languages } from '../../constants'
 import update from 'react-addons-update'
 
 const initialFilter = {
 	showMe: false,
 	showFavourites: false,
-	sort: 'date',
+	sort: 'created_at',
 	country: '',
 	region: '',
 	nationality: '',
@@ -20,9 +19,8 @@ const initialState = {
 	filter: initialFilter,
 	modalUser: null,
 	totalLikes: null,
-	countriesObj: null,
-	countriesGeonamesIds: null,
-	nationalitiesGeonamesIds: null
+	countries: null,
+	nationalities: null
 }
 
 export default function usersReducer(state = initialState, { type, payload }) {
@@ -159,16 +157,11 @@ export default function usersReducer(state = initialState, { type, payload }) {
 		case 'SET_MODAL_USER':
 			return { ...state, modalUser: payload }
 		case 'SET_GEO':
-			const {
-				countriesObj,
-				countriesGeonamesIds,
-				nationalitiesGeonamesIds
-			} = payload
+			const { countries, nationalities } = payload
 			return {
 				...state,
-				countriesObj,
-				countriesGeonamesIds,
-				nationalitiesGeonamesIds
+				countries,
+				nationalities
 			}
 		case 'CLEAR_MAIN_IMAGES':
 			return { ...state, images: null }

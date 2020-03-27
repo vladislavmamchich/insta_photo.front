@@ -19,21 +19,40 @@ const User = props => {
 	const { match, user_id, history, location } = props
 
 	const dispatch = useDispatch()
-	const [index, setSelectedIndex] = useState(0)
+
+	const [index, setSelectedIndex] = useState(-1)
+	const [user, setUser] = useState(null)
+
+	// const user = useSelector(store => store.users.user)
+
+	const { heightUnit, weightUnit, data } = useSelector(store => store.profile)
+
+	const onLoad = user => {
+		setUser(user)
+		let image_index = 0
+		if (location) {
+			const search = new URLSearchParams(location.search)
+			if (search.has('image_id')) {
+				image_index = user.images.findIndex(
+					i => +i._id === +search.get('image_id')
+				)
+			}
+		}
+		setSelectedIndex(image_index)
+	}
+
 	useEffect(() => {
 		if (user_id >= 0) {
-			dispatch(t_loadUser(user_id))
+			dispatch(t_loadUser(user_id, user => onLoad(user)))
 		} else if (match && match.params && match.params.id >= 0) {
-			dispatch(t_loadUser(match.params.id))
+			dispatch(t_loadUser(match.params.id, user => onLoad(user)))
 		} else {
 			history.push('/')
 		}
-		return () => {
-			dispatch(a_setUserInfo(null))
-		}
+		// return () => {
+		// 	dispatch(a_setUserInfo(null))
+		// }
 	}, [user_id, dispatch, history, match])
-	const { user } = useSelector(store => store.users)
-	const { heightUnit, weightUnit, data } = useSelector(store => store.profile)
 
 	const like = async image_id => {
 		socket.emit('like', { image_id })
@@ -44,7 +63,8 @@ const User = props => {
 		} else {
 			user.images[index].likes.push(data._id)
 		}
-		dispatch(a_setUserInfo({ ...user, images: user.images }))
+		setUser({ ...user, images: user.images })
+		// dispatch(a_setUserInfo({ ...user, images: user.images }))
 	}
 	const favourite = async () => {
 		if (data.favourites.includes(user.images[index]._id)) {
@@ -64,9 +84,10 @@ const User = props => {
 				socket.emit('like', { image_id: user.images[index]._id })
 			}
 		}
-		dispatch(a_setUserInfo({ ...user, images: user.images }))
+		setUser({ ...user, images: user.images })
+		// dispatch(a_setUserInfo({ ...user, images: user.images }))
 	}
-	if (user) {
+	if (index >= 0 && user) {
 		const {
 			height,
 			weight,
@@ -86,11 +107,10 @@ const User = props => {
 		} = user
 		const is_me = _id === data._id
 		const in_favourites = data.favourites.includes(images[index]._id)
-		const regionLabel = country === 6252001 ? 'State' : 'Region'
-		const image_id = location
-			? new URLSearchParams(location.search).get('image_id')
-			: 0
-		const image_index = images.findIndex(i => +i._id === +image_id)
+		const regionLabel =
+			country === 'United States'
+				? i18next.t('State')
+				: i18next.t('Region')
 		return (
 			<div className="product-overview position-relative">
 				<div className="d-flex align-items-center justify-content-between top-line">
@@ -144,7 +164,7 @@ const User = props => {
 						<Carousel
 							images={images}
 							setSelectedImage={index => setSelectedIndex(index)}
-							index={image_index}
+							index={index}
 						/>
 					</div>
 				</div>
@@ -224,7 +244,9 @@ const User = props => {
 						<div className="mr-3">
 							<p className="mb-1">
 								{i18next.t('Operations')}:{' '}
-								{operations ? 'yes' : 'no'}
+								{operations
+									? i18next.t('yes')
+									: i18next.t('no')}
 							</p>
 							<p className="mb-1">
 								{i18next.t('Registration date')}:{' '}

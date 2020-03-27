@@ -633,9 +633,9 @@ hr {
   display: block;
   margin: auto;
 }
-/*
+
 .user-images .image .likes {
-  height: 60px;
+ /* height: 60px;
   padding: 2px;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
@@ -650,10 +650,11 @@ hr {
   -webkit-box-pack: center;
   justify-content: center;
   background: var(--white);
-  color: var(--coral);
+  color: var(--coral);*/
   position: absolute;
   z-index: 10;
 }
+/*
 .user-images .image .likes .text {
   -webkit-transition: 0.2s;
   transition: 0.2s;

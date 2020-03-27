@@ -41,7 +41,7 @@ class ImageUpload extends PureComponent {
 						}}
 						className="btn btn-outline-light"
 					>
-						<span>choose...</span>
+						<span>{i18next.t('choose')}...</span>
 						<input {...getInputProps()} />
 					</label>
 				)}

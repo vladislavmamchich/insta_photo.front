@@ -154,7 +154,7 @@ h6,
 	text-transform: uppercase;
 	font-family: 'Fredoka One', cursive;
 	text-align: center;
-	width: 120px;
+	min-width: 150px;
 }
 /* react select */
 /*.react-select-container {
@@ -200,6 +200,7 @@ h6,
 	color: var(--white);
 	cursor: pointer;
 	border: none;
+	background: var(--coral);
 }
 select {
 	-moz-appearance: none; /* Firefox */

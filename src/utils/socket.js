@@ -1,7 +1,7 @@
 import io from 'socket.io-client'
 
 import { store } from '../redux/store'
-import { t_loadUsers } from '../redux/tracks'
+import { t_loadUsers, t_loadProfile } from '../redux/tracks'
 import { a_like, a_setTotalLikes } from '../redux/actions'
 
 const { REACT_APP_SOCKET_SERVER, REACT_APP_SOCKET_PATH } = process.env
@@ -31,6 +31,9 @@ export const connectToSocket = () => {
                 const { page, limit } = users
                 store.dispatch(t_loadUsers({ page, limit }))
             }
+        })
+        socket.on('load_profile', () => {
+            store.dispatch(t_loadProfile())
         })
         socket.on('disconnect', reason => {
             if (reason === 'io server disconnect') {

@@ -177,16 +177,17 @@ export const t_loadUsers = payload => dispatch => {
 		})
 	})
 }
-export const t_loadUser = payload => dispatch => {
-	return new Promise(resolve => {
-		sendRequest({
-			r_path: paths.p_loadUser + payload,
-			success: res => {
-				dispatch(acts.a_setUserInfo(res.user))
-				resolve()
-			}
-		})
+export const t_loadUser = (payload, cb) => dispatch => {
+	// return new Promise(resolve => {
+	sendRequest({
+		r_path: paths.p_loadUser + payload,
+		success: res => {
+			// dispatch(acts.a_setUserInfo(res.user))
+			cb(res.user)
+			// resolve()
+		}
 	})
+	// })
 }
 export const t_userModeration = payload => dispatch => {
 	return new Promise(resolve => {

@@ -3,10 +3,11 @@ import { connect } from 'react-redux'
 // import { Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import i18next from 'i18next'
+import { CountryDropdown, RegionDropdown } from 'react-country-region-selector'
 
 import { a_updateRegisterPhoto, a_updateRotation } from '../../redux/actions'
 import { t_registerParticipant } from '../../redux/tracks'
-import { forbiddenKeyCodes, getGeonames, ages } from '../../constants'
+import { forbiddenKeyCodes, ages } from '../../constants'
 
 import Input from '../common/Input'
 import Button from '../common/Button'
@@ -14,8 +15,6 @@ import Select from '../common/Select'
 import ImageUpload from '../common/ImageUpload'
 import AddPhoto from '../AddPhoto'
 import FullWindowLoader from '../service/FullWindowLoader'
-
-const geonames = getGeonames()
 
 class Register extends PureComponent {
 	state = {
@@ -30,9 +29,7 @@ class Register extends PureComponent {
 		nationality: '',
 		age: '',
 		registration: false,
-		imagesArray: [],
-		countries: [],
-		regions: []
+		imagesArray: []
 	}
 
 	handleImageUpload = acceptedFiles => {
@@ -120,92 +117,107 @@ class Register extends PureComponent {
 		updateRotation({ index: 0, value: newRotation })
 	}
 
-	async componentDidMount() {
-		try {
-			let countries = await geonames.countryInfo({})
-			countries = countries.geonames.map(c => {
-				return {
-					label: c.countryName,
-					value: c.geonameId
-				}
-			})
-			this.setState({ countries })
-		} catch (err) {
-			console.error(err)
-		}
-	}
+	// async componentDidMount() {
+	// 	try {
+	// 		let countries = await geonames.countryInfo({})
+	// 		countries = countries.geonames.map(c => {
+	// 			return {
+	// 				label: c.countryName,
+	// 				value: c.geonameId
+	// 			}
+	// 		})
+	// 		this.setState({ countries })
+	// 	} catch (err) {
+	// 		console.error(err)
+	// 	}
+	// }
 
-	selectCountry = async geonameId => {
-		const states = await geonames.children({
-			geonameId
-		})
-		const regions = states.geonames.map(c => {
-			return {
-				label: c.name,
-				value: c.geonameId
-			}
-		})
-		this.setState({ country: geonameId, regions })
-	}
+	// selectCountry = async geonameId => {
+	// 	const states = await geonames.children({
+	// 		geonameId
+	// 	})
+	// 	const regions = states.geonames.map(c => {
+	// 		return {
+	// 			label: c.name,
+	// 			value: c.geonameId
+	// 		}
+	// 	})
+	// 	this.setState({ country: geonameId, regions })
+	// }
 
 	render() {
 		const {
 			operations,
-			country,
 			registration,
 			imagesArray,
-			countries,
-			regions
+			country,
+			region,
+			nationality
 		} = this.state
 		const { registerPhotos, rotations } = this.props
 		const addPhoto =
 			registerPhotos.length < 5 &&
 			registerPhotos.length - 1 === imagesArray.length
 		const regionLabel =
-			country === 6252001 ? i18next.t('state') : i18next.t('region')
+			country === 'United States'
+				? i18next.t('state')
+				: i18next.t('region')
 		return (
 			<div className="px-0 px-md-4">
 				<div className="row">
 					<div className="col-lg-4 col-md-6 d-flex flex-column flex-md-row justify-content-between">
 						<div className="mr-4">
-							<Select
-								className="left-asterisk"
-								onChange={({ value }) =>
-									this.selectCountry(value)
-								}
-								options={[
-									{ label: i18next.t('country'), value: '' },
-									...countries
-								]}
-							/>
-							<Select
-								className="left-asterisk"
-								onChange={({ value }) =>
-									this.setState({ region: value })
-								}
-								options={[
-									{ label: regionLabel, value: '' },
-									...regions
-								]}
-								disabled={!country}
-							/>
+							<div className="position-relative">
+								<div className="left-asterisk">
+									<CountryDropdown
+										value={country}
+										onChange={country =>
+											this.setState({
+												country
+											})
+										}
+										classes="country-region-select"
+										defaultOptionLabel={i18next.t(
+											'country'
+										)}
+									/>
+								</div>
+							</div>
+							<div className="position-relative">
+								<div className="left-asterisk">
+									<RegionDropdown
+										country={country}
+										value={region}
+										onChange={region =>
+											this.setState({
+												region
+											})
+										}
+										classes="country-region-select"
+										defaultOptionLabel={regionLabel}
+										disabled={!country}
+										blankOptionLabel={regionLabel}
+									/>
+								</div>
+							</div>
 						</div>
 						<div>
-							<Select
-								className="left-asterisk"
-								onChange={({ value }) =>
-									this.setState({
-										nationality: value
-									})
-								}
-								options={[
-									{
-										label: i18next.t('nationality'),
-										value: ''
-									},
-									...countries
-								]}
-							/>
+							<div className="position-relative">
+								<div className="left-asterisk">
+									<CountryDropdown
+										value={nationality}
+										onChange={nationality =>
+											this.setState({
+												nationality
+											})
+										}
+										classes="country-region-select"
+										defaultOptionLabel={i18next.t(
+											'nationality'
+										)}
+									/>
+								</div>
+							</div>
 							<Select
 								className="left-asterisk"
 								onChange={({ value }) =>

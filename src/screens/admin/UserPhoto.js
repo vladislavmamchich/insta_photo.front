@@ -2,8 +2,6 @@ import React, { useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCircleNotch } from '@fortawesome/free-solid-svg-icons'
-
-// import { toast } from 'react-toastify'
 // import i18next from 'i18next'
 
 import {
@@ -67,7 +65,6 @@ const UserPhoto = ({ image, main_photo, index }) => {
 		}
 	}
 	const checked = main_photo ? image._id === main_photo._id : false
-	console.log(image)
 	return (
 		<div className="row mb-5">
 			{viewImage && (

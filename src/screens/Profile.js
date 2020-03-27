@@ -32,7 +32,7 @@ class Profile extends PureComponent {
 								activeTab === 1 ? 'active' : ''
 							}`}
 							href="#!"
-							onClick={() => this.setState({ activeTab: 1 })}
+							onClick={(e) => {e.preventDefault();this.setState({ activeTab: 1 })}}
 						>
 							{i18next.t('My info')}
 						</a>
@@ -43,7 +43,7 @@ class Profile extends PureComponent {
 								activeTab === 2 ? 'active' : ''
 							}`}
 							href="#!"
-							onClick={() => this.setState({ activeTab: 2 })}
+							onClick={(e) => {e.preventDefault();this.setState({ activeTab: 2 })}}
 						>
 							{i18next.t('Favourites')}
 						</a>
@@ -54,7 +54,7 @@ class Profile extends PureComponent {
 								activeTab === 3 ? 'active' : ''
 							}`}
 							href="#!"
-							onClick={() => this.setState({ activeTab: 3 })}
+							onClick={(e) => {e.preventDefault();this.setState({ activeTab: 3 })}}
 						>
 							{i18next.t('Change password')}
 						</a>

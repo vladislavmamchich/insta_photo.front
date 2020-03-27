@@ -19,15 +19,12 @@ import {
 	heightConverter,
 	isValidEmail
 } from '../../utils/helpers'
-import { getGeonames } from '../../constants'
 
 import Input from '../../components/common/Input'
 import RegisterData from '../../components/profile/RegisterData'
 import Loader from '../../components/service/Loader'
 
 const { REACT_APP_SERVER } = process.env
-
-const geonames = getGeonames()
 
 class MyInfo extends PureComponent {
 	state = {
@@ -38,59 +35,24 @@ class MyInfo extends PureComponent {
 		secret_word: '',
 		register: false,
 		allow_share_email: false,
-		emailing: false,
-		country: '',
-		nationality: '',
-		region: ''
+		emailing: false
 	}
 
 	async componentDidMount() {
 		const {
 			profile: {
-				data: {
-					nickname,
-					email,
-					secret_word,
-					allow_share_email,
-					country,
-					nationality,
-					region
-				}
+				data: { nickname, email, secret_word, allow_share_email }
 			},
 			location: { search },
 			updateEmail,
 			history
 		} = this.props
-		if (country) {
-			const countries = await geonames.countryInfo({})
-			const countryObj = countries.geonames.find(
-				c => +c.geonameId === +country
-			)
-			const regions = await geonames.children({
-				geonameId: countryObj.geonameId
-			})
-			const regionObj = regions.geonames.find(
-				r => +r.geonameId === +region
-			)
-			this.setState({
-				nickname,
-				email,
-				secret_word,
-				allow_share_email,
-				country: countryObj.countryName,
-				nationality: countries.geonames.find(
-					c => +c.geonameId === +nationality
-				).countryName,
-				region: regionObj.name
-			})
-		} else {
-			this.setState({
-				nickname,
-				email,
-				secret_word,
-				allow_share_email
-			})
-		}
+		this.setState({
+			nickname,
+			email,
+			secret_word,
+			allow_share_email
+		})
 		if (search) {
 			const searchParams = new URLSearchParams(search.slice(1))
 			if (searchParams.has('emailToken')) {
@@ -155,10 +117,7 @@ class MyInfo extends PureComponent {
 			email,
 			allow_share_email,
 			secret_word,
-			emailing,
-			country,
-			nationality,
-			region
+			emailing
 		} = this.state
 		const isObserver = data.role === 'observer'
 		const {
@@ -175,8 +134,15 @@ class MyInfo extends PureComponent {
 			weight_unit,
 			moderated,
 			ex_observer,
-			main_photo
+			main_photo,
+			country,
+			region,
+			nationality
 		} = data
+		const regionLabel =
+			country === 'United States'
+				? i18next.t('state')
+				: i18next.t('region')
 		return (
 			<div className="tab-pane fade show active">
 				<div className="px-0 px-md-4">
@@ -364,10 +330,7 @@ class MyInfo extends PureComponent {
 											{i18next.t('Country')}: {country}
 										</p>
 										<p className="mb-1 no-wrap">
-											{country === 6252001
-												? i18next.t('State')
-												: i18next.t('Region')}
-											: {region}
+											{regionLabel}: {region}
 										</p>
 									</div>
 									<div>

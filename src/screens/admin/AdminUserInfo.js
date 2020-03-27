@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { useSelector, useDispatch, useStore } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import styled from 'styled-components'
 import { t_loadUserInfo, t_userModeration } from '../../redux/tracks'
-import { getGeonames } from '../../constants'
 
 import Button from '../../components/common/Button'
 import UserPhoto from './UserPhoto'
-
-const geonames = getGeonames()
 
 const AdminUserInfo = props => {
 	const {
@@ -16,30 +13,11 @@ const AdminUserInfo = props => {
 	} = props
 	const dispatch = useDispatch()
 	const user = useSelector(store => store.users.user)
-	const store = useStore()
 
 	const [loading, setLoading] = useState(false)
-	const [country, setCountry] = useState('')
-	const [region, setRegion] = useState('')
-	const [nationality, setNationality] = useState('')
 
 	const loadUserInfo = async () => {
 		await dispatch(t_loadUserInfo({ user_id: params.id }))
-		const { country, nationality, region } = store.getState().users.user
-		const countries = await geonames.countryInfo({})
-		const countryObj = countries.geonames.find(
-			c => +c.geonameId === +country
-		)
-		const regions = await geonames.children({
-			geonameId: countryObj.geonameId
-		})
-		const regionObj = regions.geonames.find(r => +r.geonameId === +region)
-		setCountry(countryObj.countryName)
-		setNationality(
-			countries.geonames.find(c => +c.geonameId === +nationality)
-				.countryName
-		)
-		setRegion(regionObj.name)
 	}
 
 	useEffect(() => {
@@ -67,7 +45,10 @@ const AdminUserInfo = props => {
 			thighs,
 			weight,
 			images,
-			main_photo
+			main_photo,
+			country,
+			region,
+			nationality
 		} = user
 		return (
 			<Styles>

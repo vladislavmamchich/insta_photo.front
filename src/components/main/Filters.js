@@ -1,39 +1,22 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import i18next from 'i18next'
-// import {
-// 	CountryDropdown,
-// 	CountryRegionData
-// } from 'react-country-region-selector'
-// import { NavLink } from 'react-router-dom'
+import {
+	CountryDropdown,
+	CountryRegionData
+} from 'react-country-region-selector'
 
-// import { toast } from 'react-toastify'
-// import MainImage from '../components/main/MainImage'
-
-// import { socket } from '../utils/socket'
 import { a_setFilter, a_clearFilter } from '../../redux/actions'
-// import { t_getCountries } from '../../redux/tracks'
-import { getGeonames, ages } from '../../constants'
+import { ages } from '../../constants'
 
 import Select from '../../components/common/Select'
-// import Select from '../../components/common/Select'
 import Loader from '../../components/service/Loader'
 
-const geonames = getGeonames()
+const shortCodesFromNames = {}
+CountryRegionData.forEach(a => (shortCodesFromNames[a[0]] = a[1]))
 
 const Filters = () => {
 	const dispatch = useDispatch()
-	// const [selectedCountry, selectCountry] = useState({
-	// 	label: i18next.t('all countries'),
-	// 	value: ''
-	// })
-	// const [selectedRegion, selectRegion] = useState({
-	// 	label: i18next.t('all regions'),
-	// 	value: ''
-	// })
-	const [countries, setCountries] = useState([])
-	const [nationalities, setNationalities] = useState([])
-	const [regions, setRegions] = useState([])
 
 	const {
 		filter: {
@@ -46,10 +29,14 @@ const Filters = () => {
 			country,
 			region
 		},
-		countriesObj,
-		countriesGeonamesIds,
-		nationalitiesGeonamesIds
+		countries,
+		nationalities
 	} = useSelector(store => store.users)
+
+	const getShortCodes = countries =>
+		countries.map(c => {
+			return shortCodesFromNames[c.value]
+		})
 
 	const { role } = useSelector(store => store.profile.data)
 	// const useDidUpdateEffect = (fn, inputs) => {
@@ -60,72 +47,20 @@ const Filters = () => {
 	// 		else didMountRef.current = true
 	// 	}, inputs)
 	// }
-	const filterGeo = async () => {
-		const all = await geonames.countryInfo({})
-		let localCountries = [],
-			localNationalities = []
-		for (const c of all.geonames) {
-			if (nationalitiesGeonamesIds.includes(c.geonameId)) {
-				localNationalities.push({
-					label: c.countryName,
-					value: c.geonameId
-				})
-			}
-			if (countriesGeonamesIds.includes(c.geonameId)) {
-				localCountries.push({
-					label: c.countryName,
-					value: c.geonameId
-				})
-			}
-		}
-		setNationalities(localNationalities)
-		setCountries(localCountries)
-	}
 
 	useEffect(() => {
-		filterGeo()
+		// filterGeo()
 		return () => {
 			dispatch(a_clearFilter())
 		}
 	}, [])
 
-	const selectCountryHandler = async country => {
-		// selectCountry(country)
-		// selectRegion({
-		// 	label: i18next.t('all regions'),
-		// 	value: ''
-		// })
-		dispatch(
-			a_setFilter({
-				field: 'country',
-				value: country.value || ''
-			})
-		)
-		dispatch(
-			a_setFilter({
-				field: 'region',
-				value: ''
-			})
-		)
-		if (country.value) {
-			let states = await geonames.children({
-				geonameId: country.value
-			})
-			states = states.geonames.filter(s =>
-				countriesObj[country.value].includes(s.geonameId)
-			)
-			const regions = states.map(s => {
-				return {
-					label: s.name,
-					value: s.geonameId
-				}
-			})
-			setRegions(regions)
-		}
-	}
-
 	const regionLabel =
-		country === 6252001 ? i18next.t('all states') : i18next.t('all regions')
+		country === 'United States'
+			? i18next.t('all states')
+			: i18next.t('all regions')
+	const regions =
+		country !== '' ? countries.find(c => c.value === country).regions : []
 	return (
 		<div className="prod-options d-flex flex-column flex-md-row">
 			<div className="d-flex flex-column justify-content-start mr-5">
@@ -168,19 +103,26 @@ const Filters = () => {
 			<div className="d-flex flex-row justify-content-start flex-wrap mr-5">
 				<div className="d-flex flex-column mr-2">
 					<div className="d-flex align-items-baseline">
-						{countriesGeonamesIds ? (
-							<Select
-								onChange={country =>
-									selectCountryHandler(country)
-								}
-								selected={country}
-								options={[
-									{
-										label: i18next.t('all countries'),
-										value: ''
-									},
-									...countries
-								]}
+						{countries ? (
+							<CountryDropdown
+								value={country}
+								onChange={country => {
+									dispatch(
+										a_setFilter({
+											field: 'country',
+											value: country || ''
+										})
+									)
+									dispatch(
+										a_setFilter({
+											field: 'region',
+											value: ''
+										})
+									)
+								}}
+								classes="country-region-select"
+								defaultOptionLabel={i18next.t('all countries')}
+								whitelist={getShortCodes(countries)}
 							/>
 						) : (
 							<div className="d-flex px-2">
@@ -192,23 +134,32 @@ const Filters = () => {
 					<div className="d-flex align-items-baseline">
 						{countries ? (
 							<Select
-								onChange={region => {
-									// selectRegion(region)
+								onChange={({ value }) =>
 									dispatch(
 										a_setFilter({
 											field: 'region',
-											value: region.value || ''
+											value: value || ''
 										})
 									)
-								}}
+								}
+								//width="90px"
 								selected={region}
-								options={[
-									{
-										label: regionLabel,
-										value: ''
-									},
-									...regions
-								]}
+								options={
+									country !== ''
+										? [
+												{
+													label: regionLabel,
+													value: ''
+												},
+												...regions
+										  ]
+										: [
+												{
+													label: regionLabel,
+													value: ''
+												}
+										  ]
+								}
 								isDisabled={country === ''}
 							/>
 						) : (
@@ -221,24 +172,22 @@ const Filters = () => {
 				</div>
 				<div>
 					<div className="d-flex align-items-baseline">
-						{nationalitiesGeonamesIds ? (
-							<Select
-								onChange={({ value }) => {
+						{countries ? (
+							<CountryDropdown
+								value={nationality}
+								onChange={nationality =>
 									dispatch(
 										a_setFilter({
 											field: 'nationality',
-											value
+											value: nationality || ''
 										})
 									)
-								}}
-								selected={nationality}
-								options={[
-									{
-										label: i18next.t('all nationalities'),
-										value: ''
-									},
-									...nationalities
-								]}
+								}
+								classes="country-region-select"
+								defaultOptionLabel={i18next.t(
+									'all nationalities'
+								)}
+								whitelist={getShortCodes(nationalities)}
 							/>
 						) : (
 							<div className="d-flex px-2">
@@ -274,12 +223,12 @@ const Filters = () => {
 					<div className="custom-checkbox mr-2">
 						<label>
 							<input
-								checked={sort === 'date'}
+								checked={sort === 'created_at'}
 								onChange={() =>
 									dispatch(
 										a_setFilter({
 											field: 'sort',
-											value: 'date'
+											value: 'created_at'
 										})
 									)
 								}
@@ -292,12 +241,12 @@ const Filters = () => {
 					<div className="custom-checkbox mr-2">
 						<label>
 							<input
-								checked={sort === 'likes'}
+								checked={sort === 'total_likes'}
 								onChange={() =>
 									dispatch(
 										a_setFilter({
 											field: 'sort',
-											value: 'likes'
+											value: 'total_likes'
 										})
 									)
 								}
