@@ -34,22 +34,15 @@ const Filters = () => {
 	} = useSelector(store => store.users)
 
 	const getShortCodes = countries =>
-		countries.map(c => {
-			return shortCodesFromNames[c.value]
-		})
+		countries.length > 0
+			? countries.map(c => {
+					return shortCodesFromNames[c.value]
+			  })
+			: ['']
 
 	const { role } = useSelector(store => store.profile.data)
-	// const useDidUpdateEffect = (fn, inputs) => {
-	// 	const didMountRef = useRef(false)
-
-	// 	useEffect(() => {
-	// 		if (didMountRef.current) fn()
-	// 		else didMountRef.current = true
-	// 	}, inputs)
-	// }
 
 	useEffect(() => {
-		// filterGeo()
 		return () => {
 			dispatch(a_clearFilter())
 		}
@@ -142,7 +135,6 @@ const Filters = () => {
 										})
 									)
 								}
-								//width="90px"
 								selected={region}
 								options={
 									country !== ''

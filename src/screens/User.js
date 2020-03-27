@@ -23,8 +23,6 @@ const User = props => {
 	const [index, setSelectedIndex] = useState(-1)
 	const [user, setUser] = useState(null)
 
-	// const user = useSelector(store => store.users.user)
-
 	const { heightUnit, weightUnit, data } = useSelector(store => store.profile)
 
 	const onLoad = user => {
@@ -49,10 +47,7 @@ const User = props => {
 		} else {
 			history.push('/')
 		}
-		// return () => {
-		// 	dispatch(a_setUserInfo(null))
-		// }
-	}, [user_id, dispatch, history, match])
+	}, [])
 
 	const like = async image_id => {
 		socket.emit('like', { image_id })
@@ -64,7 +59,6 @@ const User = props => {
 			user.images[index].likes.push(data._id)
 		}
 		setUser({ ...user, images: user.images })
-		// dispatch(a_setUserInfo({ ...user, images: user.images }))
 	}
 	const favourite = async () => {
 		if (data.favourites.includes(user.images[index]._id)) {
@@ -85,7 +79,6 @@ const User = props => {
 			}
 		}
 		setUser({ ...user, images: user.images })
-		// dispatch(a_setUserInfo({ ...user, images: user.images }))
 	}
 	if (index >= 0 && user) {
 		const {

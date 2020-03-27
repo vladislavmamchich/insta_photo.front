@@ -57,7 +57,7 @@ const customStyles = {
     valueContainer: provided => ({
         ...provided,
         height,
-        padding: 0
+        padding: '0 2px'
     }),
     container: (provided, { selectProps }) => ({
         ...provided,

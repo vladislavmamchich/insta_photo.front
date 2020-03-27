@@ -197,22 +197,19 @@ h6,
 }
 .country-region-select option {
 	width: 140px;
-	color: var(--white);
+	color: #333;
 	cursor: pointer;
 	border: none;
-	background: var(--coral);
+	background-color: #eee;
 }
 select {
-	-moz-appearance: none; /* Firefox */
 	-webkit-appearance: none; /* Safari and Chrome */
 	appearance: none;
-	/*padding: 5px;*/
-	/*line-height: 1;*/
 	height: 24px;
-	background-position-x: 244px;
-	padding: 0 30px 0 10px !important;
-	-webkit-padding-end: 20px !important;
-	-webkit-padding-start: 3px !important;
+	/*background-position-x: 244px;*/
+	/*padding: 0 30px 0 10px !important;*/
+	/*-webkit-padding-end: 20px !important;*/
+	-webkit-padding-start: 4px !important;
 }
 .captcha {
 	border: 1px solid white;
